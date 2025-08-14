@@ -143,7 +143,12 @@ export class SupabaseDataService {
         is_important: taskData.isImportant || false,
         start_date: taskData.start_date?.toISOString(),
         due_date: taskData.due_date?.toISOString(),
-        estimated_time: taskData.estimated_time
+        estimated_time: taskData.estimated_time,
+        meeting_url: taskData.meeting_url,
+        location: taskData.location,
+        attendees: taskData.attendees,
+        meeting_notes: taskData.meeting_notes,
+        reminder_minutes: taskData.reminder_minutes
       };
 
       const { data, error } = await supabase

@@ -145,6 +145,7 @@ export type Database = {
       tasks: {
         Row: {
           actual_time: number | null
+          attendees: string[] | null
           category: string
           completed: boolean | null
           completed_at: string | null
@@ -155,7 +156,11 @@ export type Database = {
           id: string
           is_important: boolean | null
           is_urgent: boolean | null
+          location: string | null
+          meeting_notes: string | null
+          meeting_url: string | null
           priority: string
+          reminder_minutes: number | null
           start_date: string | null
           title: string
           updated_at: string | null
@@ -163,6 +168,7 @@ export type Database = {
         }
         Insert: {
           actual_time?: number | null
+          attendees?: string[] | null
           category: string
           completed?: boolean | null
           completed_at?: string | null
@@ -173,7 +179,11 @@ export type Database = {
           id?: string
           is_important?: boolean | null
           is_urgent?: boolean | null
+          location?: string | null
+          meeting_notes?: string | null
+          meeting_url?: string | null
           priority: string
+          reminder_minutes?: number | null
           start_date?: string | null
           title: string
           updated_at?: string | null
@@ -181,6 +191,7 @@ export type Database = {
         }
         Update: {
           actual_time?: number | null
+          attendees?: string[] | null
           category?: string
           completed?: boolean | null
           completed_at?: string | null
@@ -191,7 +202,11 @@ export type Database = {
           id?: string
           is_important?: boolean | null
           is_urgent?: boolean | null
+          location?: string | null
+          meeting_notes?: string | null
+          meeting_url?: string | null
           priority?: string
+          reminder_minutes?: number | null
           start_date?: string | null
           title?: string
           updated_at?: string | null
