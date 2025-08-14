@@ -249,28 +249,37 @@ export function useOptimizedTasks() {
     });
   }, [tasks, filters]);
 
-  // Estatísticas de produtividade otimizadas
+  // Estatísticas de produtividade otimizadas - apenas para hoje
   const productivityStats = useMemo((): ProductivityStats => {
-    const completed = tasks.filter(t => t.completed);
-    const pending = tasks.filter(t => !t.completed);
-    const overdue = pending.filter(t => 
-      t.due_date && new Date(t.due_date) < new Date()
-    );
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const completedToday = completed.filter(t => 
-      t.completed_at && new Date(t.completed_at) >= today && new Date(t.completed_at) < tomorrow
+    // Tarefas que devem ser feitas hoje (criadas hoje ou com due_date hoje)
+    const tasksForToday = tasks.filter(t => {
+      const createdToday = new Date(t.created_at) >= today && new Date(t.created_at) < tomorrow;
+      const dueToday = t.due_date && new Date(t.due_date) >= today && new Date(t.due_date) < tomorrow;
+      return createdToday || dueToday;
+    });
+
+    // Tarefas concluídas hoje
+    const completedToday = tasks.filter(t => 
+      t.completed && t.completed_at && 
+      new Date(t.completed_at) >= today && 
+      new Date(t.completed_at) < tomorrow
     );
 
+    // Calcular produtividade baseada apenas em tarefas de hoje
+    const todayProductivityScore = tasksForToday.length > 0 
+      ? (completedToday.length / tasksForToday.length) * 100 
+      : 0;
+
     return {
-      tasksCompleted: completed.length,
-      totalTasks: tasks.length,
+      tasksCompleted: completedToday.length,
+      totalTasks: tasksForToday.length,
       focusTime: 0,
-      productivityScore: tasks.length > 0 ? (completed.length / tasks.length) * 100 : 0,
+      productivityScore: todayProductivityScore,
       streak: 0,
       calculated_at: new Date()
     };
