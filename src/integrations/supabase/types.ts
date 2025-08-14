@@ -7,13 +7,40 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
   public: {
     Tables: {
+      notes: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       productivity_stats: {
         Row: {
           calculated_at: string | null
@@ -172,6 +199,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_email_settings: {
+        Row: {
+          created_at: string
+          email_enabled: boolean
+          id: string
+          last_sent_at: string | null
+          send_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          last_sent_at?: string | null
+          send_time?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          last_sent_at?: string | null
+          send_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_game_stats: {
         Row: {
           achievements: Json | null
@@ -204,6 +261,63 @@ export type Database = {
           points?: number | null
           streak?: number | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_goals: {
+        Row: {
+          category: string | null
+          completed: boolean
+          created_at: string
+          current: number
+          description: string
+          end_date: string
+          id: string
+          priority: string | null
+          rewards: Json
+          start_date: string
+          target: number
+          title: string
+          type: string
+          unit: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          completed?: boolean
+          created_at?: string
+          current?: number
+          description: string
+          end_date: string
+          id: string
+          priority?: string | null
+          rewards?: Json
+          start_date: string
+          target: number
+          title: string
+          type: string
+          unit: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          completed?: boolean
+          created_at?: string
+          current?: number
+          description?: string
+          end_date?: string
+          id?: string
+          priority?: string | null
+          rewards?: Json
+          start_date?: string
+          target?: number
+          title?: string
+          type?: string
+          unit?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
