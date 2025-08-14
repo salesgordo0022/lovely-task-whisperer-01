@@ -192,153 +192,43 @@ export class AIService {
       toggleTask: (id: string) => Promise<void>;
     }
   ): Promise<{ response: string; actions?: { type: string; data: any }[] }> {
-    const GROQ_API_KEY = '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';
-    
-    // Preparar contexto sobre as tarefas do usuário
-    const pendingTasks = tasks.filter(t => !t.completed);
-    const completedTasks = tasks.filter(t => t.completed);
-    const overdueTasks = tasks.filter(t => 
-      t.due_date && new Date(t.due_date) < new Date() && !t.completed
-    );
+    // Usar Edge Function segura para chamadas de IA
+    try {
+      const response = await fetch('https://lzcbcsflkikxgojxmyoy.supabase.co/functions/v1/ai-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+          character,
+          tasks,
+          stats,
+          chatHistory,
+          userName
+        }),
+      });
 
-    const tasksContext = `
-DADOS DO SISTEMA:
-- Total de tarefas: ${stats.totalTasks}
-- Tarefas concluídas: ${stats.tasksCompleted}
-- Tarefas pendentes: ${pendingTasks.length}
-- Tarefas em atraso: ${overdueTasks.length}
-- Score de produtividade: ${stats.productivityScore}%
-- Sequência atual: ${stats.streak} dias
-
-TAREFAS PENDENTES:
-${pendingTasks.map(t => `- ID: ${t.id}, Título: "${t.title}" (${t.category}, prioridade: ${t.priority}${t.due_date ? `, prazo: ${new Date(t.due_date).toLocaleDateString()}` : ''})`).join('\n')}
-
-TAREFAS EM ATRASO:
-${overdueTasks.map(t => `- ID: ${t.id}, Título: "${t.title}" (${t.category}, prazo: ${new Date(t.due_date).toLocaleDateString()})`).join('\n')}
-`;
-
-    const personality = CHARACTER_PERSONALITIES[character.id];
-    const systemPrompt = `Você é ${character.name}. ${userName ? `O usuário se chama ${userName}.` : ''} 
-
-PERSONALIDADE:
-${personality.personality}
-
-ESTILO DE COMUNICAÇÃO:
-${personality.communicationStyle}
-
-FRASES MOTIVACIONAIS CARACTERÍSTICAS:
-${personality.motivationalPhrases.join('\n')}
-
-PALAVRAS DE ENCORAJAMENTO:
-Use palavras como: ${personality.encouragementWords.join(', ')}
-
-HABILIDADES DE GERENCIAMENTO DE TAREFAS:
-Você pode realizar ações no sistema de tarefas. Quando o usuário pedir para criar, concluir ou excluir tarefas, use esses comandos na sua resposta:
-
-1. CRIAR TAREFA: Use [CREATE_TASK:título|categoria|prioridade|descrição] 
-   - Categorias: personal, work, agenda
-   - Prioridades: urgent, important, normal
-   
-2. CONCLUIR TAREFA: Use [COMPLETE_TASK:id_da_tarefa]
-
-3. EXCLUIR TAREFA: Use [DELETE_TASK:id_da_tarefa]
-
-Analise os dados do sistema fornecidos e responda mantendo sua personalidade única. Seja autêntico ao personagem.
-
-${tasksContext}`;
-
-    const recentHistory = chatHistory.slice(-10);
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...recentHistory.map(msg => ({
-        role: msg.isUser ? 'user' : 'assistant',
-        content: msg.content
-      })),
-      { role: 'user', content: message }
-    ];
-
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 1000,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const aiResponse = data.choices[0]?.message?.content || 'Interessante... permita-me analisar melhor a situação.';
-    
-    // Processar comandos de ação
-    const actions: { type: string; data: any }[] = [];
-    let cleanResponse = aiResponse;
-
-    // Detectar comandos de criação de tarefa
-    const createMatches = aiResponse.match(/\[CREATE_TASK:([^|]+)\|([^|]+)\|([^|]+)\|([^\]]+)\]/g);
-    if (createMatches && taskActions) {
-      for (const match of createMatches) {
-        const parts = match.match(/\[CREATE_TASK:([^|]+)\|([^|]+)\|([^|]+)\|([^\]]+)\]/);
-        if (parts) {
-          const [, title, category, priority, description] = parts;
-          actions.push({
-            type: 'CREATE_TASK',
-            data: {
-              title: title.trim(),
-              category: category.trim() as 'personal' | 'work' | 'agenda',
-              priority: priority.trim() as 'urgent' | 'important' | 'normal',
-              description: description.trim(),
-              isUrgent: priority.trim() === 'urgent',
-              isImportant: priority.trim() === 'important' || priority.trim() === 'urgent'
-            }
-          });
-        }
-        cleanResponse = cleanResponse.replace(match, '');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Edge Function Error:', response.status, errorText);
+        throw new Error(`Edge Function Error: ${response.status}`);
       }
-    }
 
-    // Detectar comandos de conclusão
-    const completeMatches = aiResponse.match(/\[COMPLETE_TASK:([^\]]+)\]/g);
-    if (completeMatches && taskActions) {
-      for (const match of completeMatches) {
-        const taskId = match.match(/\[COMPLETE_TASK:([^\]]+)\]/)?.[1];
-        if (taskId) {
-          actions.push({
-            type: 'COMPLETE_TASK',
-            data: { id: taskId.trim() }
-          });
-        }
-        cleanResponse = cleanResponse.replace(match, '');
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
       }
-    }
 
-    // Detectar comandos de exclusão
-    const deleteMatches = aiResponse.match(/\[DELETE_TASK:([^\]]+)\]/g);
-    if (deleteMatches && taskActions) {
-      for (const match of deleteMatches) {
-        const taskId = match.match(/\[DELETE_TASK:([^\]]+)\]/)?.[1];
-        if (taskId) {
-          actions.push({
-            type: 'DELETE_TASK',
-            data: { id: taskId.trim() }
-          });
-        }
-        cleanResponse = cleanResponse.replace(match, '');
-      }
+      return {
+        response: data.response,
+        actions: data.actions
+      };
+    } catch (error) {
+      console.error('Erro na Edge Function:', error);
+      throw error;
     }
-
-    return { 
-      response: cleanResponse.trim(), 
-      actions: actions.length > 0 ? actions : undefined 
-    };
   }
 
   private static generateAyanokojiResponse(
