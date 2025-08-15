@@ -340,10 +340,10 @@ export function useOptimizedTasks() {
   // Tarefas agrupadas por matriz Eisenhower (para compatibilidade)
   const tasksByEisenhower = useMemo(() => {
     return {
-      urgent_important: tasks.filter(t => (t.isUrgent === true) && (t.isImportant === true)),
-      urgent_not_important: tasks.filter(t => (t.isUrgent === true) && (t.isImportant !== true)),
-      not_urgent_important: tasks.filter(t => (t.isUrgent !== true) && (t.isImportant === true)),
-      not_urgent_not_important: tasks.filter(t => (t.isUrgent !== true) && (t.isImportant !== true))
+      urgent_important: tasks.filter(t => !t.completed && (t.isUrgent === true) && (t.isImportant === true)),
+      urgent_not_important: tasks.filter(t => !t.completed && (t.isUrgent === true) && (t.isImportant !== true)),
+      not_urgent_important: tasks.filter(t => !t.completed && (t.isUrgent !== true) && (t.isImportant === true)),
+      not_urgent_not_important: tasks.filter(t => !t.completed && (t.isUrgent !== true) && (t.isImportant !== true))
     };
   }, [tasks]);
 
