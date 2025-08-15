@@ -261,21 +261,28 @@ ${tasksContext}`;
 
     // Detectar comandos de criação de tarefa
     const createMatches = aiResponse.match(/\[CREATE_TASK:([^|]+)\|([^|]+)\|([^|]+)\|([^\]]+)\]/g);
+    console.log('Create matches found:', createMatches);
+    
     if (createMatches) {
       for (const match of createMatches) {
         const parts = match.match(/\[CREATE_TASK:([^|]+)\|([^|]+)\|([^|]+)\|([^\]]+)\]/);
+        console.log('Processing create match:', match, 'Parts:', parts);
+        
         if (parts) {
           const [, title, category, priority, description] = parts;
+          const taskData = {
+            title: title.trim(),
+            category: category.trim(),
+            priority: priority.trim(),
+            description: description.trim(),
+            isUrgent: priority.trim() === 'urgent',
+            isImportant: priority.trim() === 'important' || priority.trim() === 'urgent'
+          };
+          
+          console.log('Creating task action with data:', taskData);
           actions.push({
             type: 'CREATE_TASK',
-            data: {
-              title: title.trim(),
-              category: category.trim(),
-              priority: priority.trim(),
-              description: description.trim(),
-              isUrgent: priority.trim() === 'urgent',
-              isImportant: priority.trim() === 'important' || priority.trim() === 'urgent'
-            }
+            data: taskData
           });
         }
         cleanResponse = cleanResponse.replace(match, '');

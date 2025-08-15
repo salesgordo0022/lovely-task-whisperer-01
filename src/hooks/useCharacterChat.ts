@@ -56,7 +56,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
       // Preparar funções de ação para tarefas
       const taskActions = {
         createTask: async (task: any) => {
-          await taskManager.createTask(task);
+          await taskManager.addTask(task); // Usar addTask ao invés de createTask
         },
         deleteTask: taskManager.deleteTask,
         toggleTask: taskManager.toggleTask
@@ -79,7 +79,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
           try {
             switch (action.type) {
               case 'CREATE_TASK':
-                await taskManager.createTask(action.data);
+                await taskManager.addTask(action.data); // Usar addTask ao invés de createTask
                 toast({
                   title: "✅ Tarefa criada",
                   description: `"${action.data.title}" foi adicionada pelo assistente.`,
