@@ -174,8 +174,8 @@ export class AIService {
     } catch (error) {
       console.error('Erro na API:', error);
       // Fallback para respostas locais
-      const response = this.generatePersonalityResponse(message, character, stats, chatHistory);
-      return { response };
+      const result = this.generatePersonalityResponse(message, character, stats, chatHistory, taskActions);
+      return result;
     }
   }
 
@@ -262,10 +262,15 @@ export class AIService {
     message: string, 
     character: Character, 
     stats: ProductivityStats,
-    chatHistory: ChatMessage[] = []
-  ): string {
+    chatHistory: ChatMessage[] = [],
+    taskActions?: {
+      createTask: (task: any) => Promise<void>;
+      deleteTask: (id: string) => Promise<void>;
+      toggleTask: (id: string) => Promise<void>;
+    }
+  ): { response: string; actions?: { type: string; data: any }[] } {
     const personality = CHARACTER_PERSONALITIES[character.id];
-    if (!personality) return `${character.emoji} Como posso ajudar?`;
+    if (!personality) return { response: `${character.emoji} Como posso ajudar?` };
 
     const lowerMessage = message.toLowerCase();
     
@@ -273,6 +278,60 @@ export class AIService {
     const pendingTasks = stats.totalTasks - stats.tasksCompleted;
     const isGoodProgress = stats.productivityScore > 70;
     const hasStreak = stats.streak > 0;
+
+    // Detectar solicitações de criação de tarefa
+    if (lowerMessage.includes('criar') || lowerMessage.includes('nova tarefa') || lowerMessage.includes('adicionar tarefa')) {
+      const actions = [];
+      let response = `${character.emoji} Vou criar uma tarefa para você! `;
+      
+      // Extrair título da tarefa da mensagem
+      let title = 'Nova tarefa';
+      let category: 'personal' | 'work' | 'agenda' = 'personal';
+      let priority: 'normal' | 'important' | 'urgent' = 'normal';
+      
+      // Tentar extrair informações da mensagem
+      if (lowerMessage.includes('trabalho') || lowerMessage.includes('profissional')) {
+        category = 'work';
+      } else if (lowerMessage.includes('reunião') || lowerMessage.includes('compromisso')) {
+        category = 'agenda';
+      }
+      
+      if (lowerMessage.includes('urgente')) {
+        priority = 'urgent';
+      } else if (lowerMessage.includes('importante')) {
+        priority = 'important';
+      }
+      
+      // Extrair título após palavras-chave
+      const createWords = ['criar', 'nova tarefa', 'adicionar tarefa', 'quero que crie'];
+      for (const word of createWords) {
+        if (lowerMessage.includes(word)) {
+          const parts = message.split(new RegExp(word, 'i'));
+          if (parts.length > 1) {
+            title = parts[1].trim() || 'Nova tarefa';
+            break;
+          }
+        }
+      }
+      
+      const taskData = {
+        title,
+        description: '',
+        category,
+        priority,
+        isUrgent: priority === 'urgent',
+        isImportant: priority === 'important' || priority === 'urgent'
+      };
+      
+      actions.push({
+        type: 'CREATE_TASK',
+        data: taskData
+      });
+      
+      response += `Criei a tarefa "${title}" na categoria ${category} com prioridade ${priority}. ${personality.motivationalPhrases[Math.floor(Math.random() * personality.motivationalPhrases.length)]} 🚀`;
+      
+      return { response, actions };
+    }
     
     // Respostas contextuais baseadas na mensagem e situação
     if (lowerMessage.includes('triste') || lowerMessage.includes('desanimado') || lowerMessage.includes('difícil') || lowerMessage.includes('não consigo')) {
@@ -281,18 +340,18 @@ export class AIService {
         `${character.emoji} Olha só sua jornada até aqui: ${stats.tasksCompleted} tarefas concluídas! Você é mais forte do que imagina! ✨`,
         `${character.emoji} Dias difíceis fazem pessoas fortes. Você já provou que consegue - sua sequência de ${stats.streak} dias é a prova! 🔥`
       ];
-      return encouragements[Math.floor(Math.random() * encouragements.length)];
+      return { response: encouragements[Math.floor(Math.random() * encouragements.length)] };
     }
     
     if (lowerMessage.includes('completei') || lowerMessage.includes('terminei') || lowerMessage.includes('consegui') || lowerMessage.includes('fiz')) {
-      return `${character.emoji} INCRÍVEL! 🎉 Você está arrasando, ${personality.encouragementWords[Math.floor(Math.random() * personality.encouragementWords.length)]}! Cada tarefa concluída te deixa mais poderoso! Continue assim! ⚡`;
+      return { response: `${character.emoji} INCRÍVEL! 🎉 Você está arrasando, ${personality.encouragementWords[Math.floor(Math.random() * personality.encouragementWords.length)]}! Cada tarefa concluída te deixa mais poderoso! Continue assim! ⚡` };
     }
     
     if (lowerMessage.includes('como') && lowerMessage.includes('estou')) {
       if (isGoodProgress) {
-        return `${character.emoji} Você está indo MUITO bem! 🌟 Score de ${stats.productivityScore}%, ${stats.tasksCompleted} tarefas concluídas e uma sequência de ${stats.streak} dias. Sou muito orgulhoso de você! 💫`;
+        return { response: `${character.emoji} Você está indo MUITO bem! 🌟 Score de ${stats.productivityScore}%, ${stats.tasksCompleted} tarefas concluídas e uma sequência de ${stats.streak} dias. Sou muito orgulhoso de você! 💫` };
       } else {
-        return `${character.emoji} Vamos analisar juntos: você tem ${pendingTasks} tarefas pendentes, mas já completou ${stats.tasksCompleted}! Todo progresso conta. Que tal focarmos na próxima tarefa? 🎯`;
+        return { response: `${character.emoji} Vamos analisar juntos: você tem ${pendingTasks} tarefas pendentes, mas já completou ${stats.tasksCompleted}! Todo progresso conta. Que tal focarmos na próxima tarefa? 🎯` };
       }
     }
     
@@ -302,7 +361,7 @@ export class AIService {
         `${character.emoji} Lembra-se de quem você é: alguém que completa tarefas, mantém sequências e não desiste! Vamos continuar! 🚀`,
         `${character.emoji} Sua energia está dentro de você! ${stats.tasksCompleted} tarefas concluídas mostram seu poder. Desperte o ${personality.encouragementWords[Math.floor(Math.random() * personality.encouragementWords.length)]} que há em você! ⚡`
       ];
-      return motivations[Math.floor(Math.random() * motivations.length)];
+      return { response: motivations[Math.floor(Math.random() * motivations.length)] };
     }
     
     if (lowerMessage.includes('dica') || lowerMessage.includes('ajuda') || lowerMessage.includes('como') || lowerMessage.includes('produtivo')) {
@@ -312,23 +371,23 @@ export class AIService {
         `${character.emoji} Organize seu ambiente antes de começar. Um espaço limpo = mente clara = produtividade máxima! 🌟`,
         `${character.emoji} Celebre cada pequena vitória! Seu cérebro ama recompensas e isso te motiva para a próxima tarefa! 🎉`
       ];
-      return tips[Math.floor(Math.random() * tips.length)];
+      return { response: tips[Math.floor(Math.random() * tips.length)] };
     }
     
     if (lowerMessage.includes('obrigad') || lowerMessage.includes('valeu') || lowerMessage.includes('brigad')) {
-      return `${character.emoji} É uma honra te acompanhar nessa jornada! Estamos juntos nessa, ${personality.encouragementWords[Math.floor(Math.random() * personality.encouragementWords.length)]}! Sempre que precisar, estarei aqui! 🤝✨`;
+      return { response: `${character.emoji} É uma honra te acompanhar nessa jornada! Estamos juntos nessa, ${personality.encouragementWords[Math.floor(Math.random() * personality.encouragementWords.length)]}! Sempre que precisar, estarei aqui! 🤝✨` };
     }
 
     if (lowerMessage.includes('oi') || lowerMessage.includes('olá') || lowerMessage.includes('eae') || lowerMessage.includes('hey')) {
-      return `${character.emoji} Olá, ${personality.encouragementWords[Math.floor(Math.random() * personality.encouragementWords.length)]}! Como você está se sentindo hoje? Pronto para conquistar suas tarefas? 😊✨`;
+      return { response: `${character.emoji} Olá, ${personality.encouragementWords[Math.floor(Math.random() * personality.encouragementWords.length)]}! Como você está se sentindo hoje? Pronto para conquistar suas tarefas? 😊✨` };
     }
 
     if (lowerMessage.includes('cansado') || lowerMessage.includes('exausto') || lowerMessage.includes('esgotado')) {
-      return `${character.emoji} Entendo que está cansado... Que tal uma pausa estratégica? Às vezes descansar é a atitude mais produtiva! Hidrate-se e volte renovado! 💧🌱`;
+      return { response: `${character.emoji} Entendo que está cansado... Que tal uma pausa estratégica? Às vezes descansar é a atitude mais produtiva! Hidrate-se e volte renovado! 💧🌱` };
     }
 
     if (lowerMessage.includes('quantas') || lowerMessage.includes('tarefas') || lowerMessage.includes('faltam')) {
-      return `${character.emoji} Vamos ver: você tem ${pendingTasks} tarefas pendentes e já completou ${stats.tasksCompleted}! Está progredindo bem. Uma de cada vez e logo chegará lá! 📊✨`;
+      return { response: `${character.emoji} Vamos ver: você tem ${pendingTasks} tarefas pendentes e já completou ${stats.tasksCompleted}! Está progredindo bem. Uma de cada vez e logo chegará lá! 📊✨` };
     }
 
     // Resposta padrão baseada na personalidade e contexto
@@ -339,7 +398,7 @@ export class AIService {
       `${character.emoji} Que bom te ver! Como posso te ajudar a ser ainda mais incrível hoje? ✨`
     ];
     
-    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    return { response: defaultResponses[Math.floor(Math.random() * defaultResponses.length)] };
   }
 
   static getCharacterGreeting(character: Character): string {
