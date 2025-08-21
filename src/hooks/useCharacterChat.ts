@@ -53,13 +53,21 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
     });
 
     try {
-      // Preparar funções de ação para tarefas
-      const taskActions = {
+      // Preparar funções de ação para tarefas e notas
+      const dataActions = {
         createTask: async (task: any) => {
           await taskManager.addTask(task); // Usar addTask ao invés de createTask
         },
         deleteTask: taskManager.deleteTask,
-        toggleTask: taskManager.toggleTask
+        toggleTask: taskManager.toggleTask,
+        createNote: async (noteData: any) => {
+          const { dataService } = await import('@/services/dataService');
+          return await dataService.createNote(noteData);
+        },
+        listNotes: async () => {
+          const { dataService } = await import('@/services/dataService');
+          return await dataService.getNotes();
+        }
       };
 
       // Obter resposta da IA
@@ -70,7 +78,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
         stats,
         chatHistory,
         userName,
-        taskActions
+        dataActions
       );
 
       // Executar ações se houver
@@ -98,6 +106,28 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
                   title: "🗑️ Tarefa excluída",
                   description: "Tarefa removida pelo assistente.",
                 });
+                break;
+              case 'CREATE_NOTE':
+                await dataActions.createNote(action.data);
+                toast({
+                  title: "📝 Anotação criada",
+                  description: `"${action.data.title}" foi criada pelo assistente.`,
+                });
+                break;
+              case 'LIST_NOTES':
+                const notesResult = await dataActions.listNotes();
+                if (notesResult.success && notesResult.data.length > 0) {
+                  const notesList = notesResult.data.map(note => `• ${note.title}`).join('\n');
+                  toast({
+                    title: "📋 Suas anotações",
+                    description: `Encontrei ${notesResult.data.length} anotações`,
+                  });
+                } else {
+                  toast({
+                    title: "📝 Sem anotações",
+                    description: "Você ainda não tem nenhuma anotação.",
+                  });
+                }
                 break;
             }
           } catch (error) {

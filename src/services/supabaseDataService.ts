@@ -536,6 +536,178 @@ export class SupabaseDataService {
     }
   }
 
+  // ============= NOTES MANAGEMENT =============
+  
+  async getNotes(): Promise<ApiResponse<Note[]>> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return {
+          data: [],
+          success: false,
+          error: 'Usuário não autenticado'
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        return {
+          data: [],
+          success: false,
+          error: error.message
+        };
+      }
+
+      return {
+        data: data || [],
+        success: true
+      };
+    } catch (error) {
+      return {
+        data: [],
+        success: false,
+        error: 'Erro ao buscar anotações'
+      };
+    }
+  }
+
+  async createNote(noteData: { title: string; content?: string }): Promise<ApiResponse<Note>> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return {
+          data: {} as Note,
+          success: false,
+          error: 'Usuário não autenticado'
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('notes')
+        .insert({
+          title: noteData.title,
+          content: noteData.content || '',
+          user_id: user.id
+        })
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          data: {} as Note,
+          success: false,
+          error: error.message
+        };
+      }
+
+      return {
+        data: data,
+        success: true,
+        message: 'Anotação criada com sucesso'
+      };
+    } catch (error) {
+      return {
+        data: {} as Note,
+        success: false,
+        error: 'Erro ao criar anotação'
+      };
+    }
+  }
+
+  async updateNote(id: string, updates: { title?: string; content?: string }): Promise<ApiResponse<Note>> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return {
+          data: {} as Note,
+          success: false,
+          error: 'Usuário não autenticado'
+        };
+      }
+
+      const updateData: any = {};
+      if (updates.title !== undefined) updateData.title = updates.title;
+      if (updates.content !== undefined) updateData.content = updates.content;
+      updateData.updated_at = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from('notes')
+        .update(updateData)
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          data: {} as Note,
+          success: false,
+          error: error.message
+        };
+      }
+
+      return {
+        data: data,
+        success: true,
+        message: 'Anotação atualizada com sucesso'
+      };
+    } catch (error) {
+      return {
+        data: {} as Note,
+        success: false,
+        error: 'Erro ao atualizar anotação'
+      };
+    }
+  }
+
+  async deleteNote(id: string): Promise<ApiResponse<void>> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return {
+          data: undefined,
+          success: false,
+          error: 'Usuário não autenticado'
+        };
+      }
+
+      const { error } = await supabase
+        .from('notes')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        return {
+          data: undefined,
+          success: false,
+          error: error.message
+        };
+      }
+
+      return {
+        data: undefined,
+        success: true,
+        message: 'Anotação excluída com sucesso'
+      };
+    } catch (error) {
+      return {
+        data: undefined,
+        success: false,
+        error: 'Erro ao excluir anotação'
+      };
+    }
+  }
+
   async syncTasks(): Promise<ApiResponse<{ synced: number; conflicts: number }>> {
     return {
       data: { synced: 0, conflicts: 0 },
@@ -543,6 +715,16 @@ export class SupabaseDataService {
       message: 'Dados sincronizados automaticamente com Supabase'
     };
   }
+}
+
+// Interfaces para notas
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export const supabaseDataService = new SupabaseDataService();

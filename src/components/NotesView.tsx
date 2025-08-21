@@ -4,22 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { StickyNote, Plus, Save } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-}
+import { StickyNote, Plus, Save, Loader2 } from 'lucide-react';
+import { useNotes } from '@/hooks/useNotes';
+import { useToast } from '@/hooks/use-toast';
 
 export function NotesView() {
-  const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
+  const { notes, isLoading, createNote } = useNotes();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
   // SEO: título, descrição e canonical
   useEffect(() => {
@@ -37,20 +32,31 @@ export function NotesView() {
 
   const canSave = useMemo(() => title.trim().length > 0 || content.trim().length > 0, [title, content]);
 
-  const handleAdd = () => {
-    if (!canSave) return;
-    const now = new Date().toISOString();
-    const newNote: Note = {
-      id: `note-${Date.now()}`,
+  const handleAdd = async () => {
+    if (!canSave || isSaving) return;
+    
+    setIsSaving(true);
+    const result = await createNote({
       title: title.trim() || 'Sem título',
-      content: content.trim(),
-      created_at: now,
-      updated_at: now,
-    };
-    setNotes((prev) => [newNote, ...prev]);
-    setTitle('');
-    setContent('');
-    setShowForm(false);
+      content: content.trim()
+    });
+    
+    if (result.success) {
+      setTitle('');
+      setContent('');
+      setShowForm(false);
+      toast({
+        title: "✅ Anotação criada",
+        description: "Sua anotação foi salva com sucesso.",
+      });
+    } else {
+      toast({
+        title: "❌ Erro",
+        description: result.error || "Não foi possível salvar a anotação.",
+        variant: "destructive"
+      });
+    }
+    setIsSaving(false);
   };
 
   return (
@@ -100,9 +106,13 @@ export function NotesView() {
                 >
                   Cancelar
                 </Button>
-                <Button onClick={handleAdd} disabled={!canSave} size="lg">
-                  <Save className="w-4 h-4 mr-2" /> 
-                  Salvar Anotação
+                <Button onClick={handleAdd} disabled={!canSave || isSaving} size="lg">
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  {isSaving ? 'Salvando...' : 'Salvar Anotação'}
                 </Button>
               </div>
             </CardContent>
@@ -113,7 +123,14 @@ export function NotesView() {
       <section aria-labelledby="lista-notas">
         
         <div className="space-y-4">
-          {notes.length === 0 ? (
+          {isLoading ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin" />
+                <p>Carregando anotações...</p>
+              </CardContent>
+            </Card>
+          ) : notes.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 <StickyNote className="w-12 h-12 mx-auto mb-4 opacity-50" />

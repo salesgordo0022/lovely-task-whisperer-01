@@ -1,5 +1,6 @@
 import { Task, ProductivityStats } from '@/types/task';
 import { Character } from '@/types/character';
+import { dataService } from './dataService';
 
 export interface AIAnalysis {
   productivityScore: number;
@@ -332,6 +333,40 @@ export class AIService {
       
       return { response, actions };
     }
+
+    // Detectar solicitações de criação de anotação
+    if ((lowerMessage.includes('criar') || lowerMessage.includes('nova') || lowerMessage.includes('adicionar')) && 
+        (lowerMessage.includes('anotação') || lowerMessage.includes('nota') || lowerMessage.includes('lembrete'))) {
+      const actions = [];
+      
+      // Extrair título e conteúdo da anotação
+      let title = this.extractNoteTitle(message);
+      let content = this.extractNoteContent(message);
+      
+      actions.push({
+        type: 'CREATE_NOTE',
+        data: { title, content }
+      });
+      
+      const response = `${character.emoji} Excelente! Criei uma anotação "${title}" para você. ${personality.encouragementWords[0]} 📝`;
+      
+      return { response, actions };
+    }
+
+    // Detectar solicitações para listar anotações
+    if ((lowerMessage.includes('mostrar') || lowerMessage.includes('ver') || lowerMessage.includes('listar')) &&
+        (lowerMessage.includes('anotações') || lowerMessage.includes('notas'))) {
+      const actions = [];
+      
+      actions.push({
+        type: 'LIST_NOTES',
+        data: {}
+      });
+      
+      const response = `${character.emoji} Vou mostrar suas anotações! ${personality.motivationalPhrases[0]} 📋`;
+      
+      return { response, actions };
+    }
     
     // Respostas contextuais baseadas na mensagem e situação
     if (lowerMessage.includes('triste') || lowerMessage.includes('desanimado') || lowerMessage.includes('difícil') || lowerMessage.includes('não consigo')) {
@@ -459,6 +494,42 @@ export class AIService {
         '🔄 Melhorar a precisão das estimativas de tempo'
       ]
     };
+  }
+
+  private static extractNoteTitle(message: string): string {
+    // Extrair título da anotação do texto
+    const patterns = [
+      /criar.*?(?:anotação|nota).*?"([^"]+)"/i,
+      /(?:anotação|nota).*?"([^"]+)"/i,
+      /criar.*?(?:anotação|nota).*?sobre\s+([^.!?]+)/i,
+      /criar.*?(?:anotação|nota).*?(\w+.*?)(?:\s|$)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = message.match(pattern);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+    
+    return "Nova anotação";
+  }
+
+  private static extractNoteContent(message: string): string {
+    // Extrair conteúdo da anotação do texto
+    const patterns = [
+      /(?:conteúdo|texto|sobre)[:]\s*"([^"]+)"/i,
+      /(?:conteúdo|texto)[:]\s*([^.!?]+)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = message.match(pattern);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+    
+    return "";
   }
 
   static async getSuggestions(taskTitle: string, category: string): Promise<string[]> {
