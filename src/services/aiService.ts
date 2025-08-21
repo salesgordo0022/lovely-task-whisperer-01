@@ -222,9 +222,15 @@ export class AIService {
         throw new Error(data.error);
       }
 
+      // Se a resposta da Edge Function estiver vazia, usar fallback local
+      if (!data.response || data.response.trim() === '') {
+        console.log('Edge Function retornou resposta vazia, usando fallback local');
+        return this.generatePersonalityResponse(message, character, stats, chatHistory, taskActions);
+      }
+
       return {
         response: data.response,
-        actions: data.actions
+        actions: data.actions || []
       };
     } catch (error) {
       console.error('Erro na Edge Function:', error);
