@@ -1,19 +1,35 @@
+
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { StickyNote, Plus, Save, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { StickyNote, Plus, Save, Loader2, Edit, Trash2, X } from 'lucide-react';
 import { useNotes } from '@/hooks/useNotes';
 import { useToast } from '@/hooks/use-toast';
 
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export function NotesView() {
-  const { notes, isLoading, createNote } = useNotes();
+  const { notes, isLoading, createNote, updateNote, deleteNote } = useNotes();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
   // SEO: título, descrição e canonical
@@ -31,6 +47,7 @@ export function NotesView() {
   }, []);
 
   const canSave = useMemo(() => title.trim().length > 0 || content.trim().length > 0, [title, content]);
+  const canUpdate = useMemo(() => editTitle.trim().length > 0 || editContent.trim().length > 0, [editTitle, editContent]);
 
   const handleAdd = async () => {
     if (!canSave || isSaving) return;
@@ -57,6 +74,64 @@ export function NotesView() {
       });
     }
     setIsSaving(false);
+  };
+
+  const handleEdit = (note: Note) => {
+    setEditingNote(note);
+    setEditTitle(note.title);
+    setEditContent(note.content);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingNote || !canUpdate || isUpdating) return;
+    
+    setIsUpdating(true);
+    const result = await updateNote(editingNote.id, {
+      title: editTitle.trim() || 'Sem título',
+      content: editContent.trim()
+    });
+    
+    if (result.success) {
+      setEditingNote(null);
+      setEditTitle('');
+      setEditContent('');
+      toast({
+        title: "✅ Anotação atualizada",
+        description: "Suas alterações foram salvas com sucesso.",
+      });
+    } else {
+      toast({
+        title: "❌ Erro",
+        description: result.error || "Não foi possível atualizar a anotação.",
+        variant: "destructive"
+      });
+    }
+    setIsUpdating(false);
+  };
+
+  const handleDelete = async (noteId: string) => {
+    setIsDeleting(noteId);
+    const result = await deleteNote(noteId);
+    
+    if (result.success) {
+      toast({
+        title: "✅ Anotação excluída",
+        description: "A anotação foi removida com sucesso.",
+      });
+    } else {
+      toast({
+        title: "❌ Erro",
+        description: result.error || "Não foi possível excluir a anotação.",
+        variant: "destructive"
+      });
+    }
+    setIsDeleting(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingNote(null);
+    setEditTitle('');
+    setEditContent('');
   };
 
   return (
@@ -121,7 +196,6 @@ export function NotesView() {
       )}
 
       <section aria-labelledby="lista-notas">
-        
         <div className="space-y-4">
           {isLoading ? (
             <Card>
@@ -148,9 +222,34 @@ export function NotesView() {
                         <StickyNote className="w-4 h-4" />
                         {note.title}
                       </CardTitle>
-                      <Badge variant="secondary" className="text-xs">
-                        {new Date(note.updated_at).toLocaleDateString('pt-BR')}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {new Date(note.updated_at).toLocaleDateString('pt-BR')}
+                        </Badge>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(note)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(note.id)}
+                            disabled={isDeleting === note.id}
+                            className="h-8 w-8 p-0 hover:text-destructive"
+                          >
+                            {isDeleting === note.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -164,6 +263,50 @@ export function NotesView() {
           )}
         </div>
       </section>
+
+      {/* Modal de Edição */}
+      <Dialog open={!!editingNote} onOpenChange={(open) => !open && cancelEdit()}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Editar Anotação
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Título da anotação"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              className="text-base"
+            />
+            <Textarea
+              placeholder="Conteúdo da anotação..."
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              rows={12}
+              className="text-base resize-none"
+            />
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={cancelEdit}>
+                <X className="w-4 h-4 mr-2" />
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleUpdate} 
+                disabled={!canUpdate || isUpdating}
+              >
+                {isUpdating ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                {isUpdating ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
