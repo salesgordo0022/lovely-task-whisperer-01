@@ -356,21 +356,41 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
                   {task.checklist.map((item, index) => (
                     <div 
                       key={item.id || index} 
-                      className="flex items-center gap-2 p-2 bg-background rounded border text-sm"
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer group hover:shadow-sm",
+                        item.completed 
+                          ? "bg-green-50 border-green-200 hover:bg-green-100" 
+                          : "bg-background hover:bg-muted/50 hover:border-primary/30"
+                      )}
+                      onClick={() => handleChecklistItemToggle(index)}
                     >
+                      <div className="flex-shrink-0 w-6 h-6 bg-muted/60 rounded-full flex items-center justify-center text-xs font-medium text-muted-foreground group-hover:bg-primary/10 transition-colors">
+                        {index + 1}
+                      </div>
+                      
                       <Checkbox
                         checked={item.completed}
                         onCheckedChange={() => handleChecklistItemToggle(index)}
-                        className="h-4 w-4"
+                        className={cn(
+                          "h-4 w-4 transition-all duration-200",
+                          item.completed && "data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                        )}
+                        onClick={(e) => e.stopPropagation()}
                       />
+                      
                       <span className={cn(
-                        'flex-1',
-                        item.completed && 'line-through text-muted-foreground'
+                        'flex-1 text-sm transition-all duration-200 select-none',
+                        item.completed 
+                          ? 'line-through text-green-700/70 font-medium' 
+                          : 'text-foreground group-hover:text-primary'
                       )}>
                         {item.title}
                       </span>
+                      
                       {item.completed && (
-                        <Check className="w-4 h-4 text-green-600" />
+                        <div className="flex-shrink-0">
+                          <Check className="w-4 h-4 text-green-600 animate-in fade-in duration-200" />
+                        </div>
                       )}
                     </div>
                   ))}
