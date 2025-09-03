@@ -347,13 +347,23 @@ export function useOptimizedTasks() {
     };
   }, [tasks]);
 
+  // Atualizar item do checklist
+  const updateChecklistItem = useCallback(async (taskId: string, itemIndex: number, completed: boolean) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.checklist || itemIndex < 0 || itemIndex >= task.checklist.length) {
+      return;
+    }
+
+    const updatedChecklist = task.checklist.map((item, index) => 
+      index === itemIndex ? { ...item, completed } : item
+    );
+
+    await updateTask(taskId, { checklist: updatedChecklist });
+  }, [tasks, updateTask]);
+
   // Aliases para compatibilidade backward
   const createTask = addTask;
   const toggleTask = toggleTaskComplete;
-  const updateChecklistItem = useCallback(async () => {
-    // Implementar se necessário
-    console.warn('updateChecklistItem não implementado ainda');
-  }, []);
 
   return {
     tasks: filteredTasks,

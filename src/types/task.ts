@@ -95,6 +95,7 @@ export interface UpdateTaskDTO {
   due_date?: Date;
   estimated_time?: number;
   actual_time?: number;
+  checklist?: TaskChecklistItem[];
   
   // Campos específicos para compromissos/reuniões
   meeting_url?: string;
