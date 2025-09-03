@@ -361,8 +361,9 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
                       
                       <Checkbox
                         checked={item.completed}
+                        onCheckedChange={() => handleChecklistItemToggle(index)}
                         className={cn(
-                          "h-4 w-4 transition-all duration-200 pointer-events-none",
+                          "h-4 w-4 transition-all duration-200",
                           item.completed && "data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
                         )}
                       />
