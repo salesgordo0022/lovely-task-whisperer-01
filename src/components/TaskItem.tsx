@@ -349,12 +349,11 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
                     <div 
                       key={item.id || index} 
                       className={cn(
-                        "flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer group hover:shadow-sm",
+                        "flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 group hover:shadow-sm",
                         item.completed 
                           ? "bg-green-50 border-green-200 hover:bg-green-100" 
                           : "bg-background hover:bg-muted/50 hover:border-primary/30"
                       )}
-                      onClick={() => handleChecklistItemToggle(index)}
                     >
                       <div className="flex-shrink-0 w-6 h-6 bg-muted/60 rounded-full flex items-center justify-center text-xs font-medium text-muted-foreground group-hover:bg-primary/10 transition-colors">
                         {index + 1}
