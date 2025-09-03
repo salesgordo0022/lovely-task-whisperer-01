@@ -239,11 +239,40 @@ export class SupabaseDataService {
         updateData.completed_at = new Date().toISOString();
       }
 
+      // Handle checklist updates separately
+      if (updates.checklist) {
+        // First, delete existing checklist items
+        await supabase
+          .from('task_checklist_items')
+          .delete()
+          .eq('task_id', id);
+        
+        // Then create new ones
+        if (updates.checklist.length > 0) {
+          const checklistData = updates.checklist.map((item, index) => ({
+            title: item.title,
+            completed: item.completed,
+            task_id: id,
+            order_index: index
+          }));
+
+          await supabase
+            .from('task_checklist_items')
+            .insert(checklistData);
+        }
+        
+        // Remove checklist from updateData as it's handled separately
+        delete updateData.checklist;
+      }
+
       const { data, error } = await supabase
         .from('tasks')
         .update(updateData)
         .eq('id', id)
-        .select()
+        .select(`
+          *,
+          task_checklist_items (*)
+        `)
         .single();
 
       if (error) {
@@ -265,7 +294,11 @@ export class SupabaseDataService {
         completed_at: data.completed_at ? new Date(data.completed_at) : undefined,
         created_at: new Date(data.created_at),
         updated_at: new Date(data.updated_at),
-        checklist: []
+        checklist: (data.task_checklist_items || []).map((item: any) => ({
+          ...item,
+          created_at: new Date(item.created_at),
+          updated_at: new Date(item.updated_at)
+        }))
       };
 
       return {

@@ -347,10 +347,11 @@ export function useOptimizedTasks() {
     };
   }, [tasks]);
 
-  // Atualizar item do checklist
+  // Atualizar item do checklist - funcionalidade corrigida
   const updateChecklistItem = useCallback(async (taskId: string, itemIndex: number, completed: boolean) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task || !task.checklist || itemIndex < 0 || itemIndex >= task.checklist.length) {
+      console.warn('Tarefa ou item do checklist não encontrado:', { taskId, itemIndex, task });
       return;
     }
 
@@ -358,6 +359,7 @@ export function useOptimizedTasks() {
       index === itemIndex ? { ...item, completed } : item
     );
 
+    console.log('Atualizando checklist:', { taskId, itemIndex, completed, updatedChecklist });
     await updateTask(taskId, { checklist: updatedChecklist });
   }, [tasks, updateTask]);
 

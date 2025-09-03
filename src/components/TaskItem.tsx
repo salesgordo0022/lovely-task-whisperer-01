@@ -92,29 +92,21 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
   };
 
   const handleChecklistItemToggle = (itemIndex: number) => {
-    if (onUpdateChecklistItem) {
+    if (onUpdateChecklistItem && task.checklist && task.checklist[itemIndex]) {
       const currentItem = task.checklist[itemIndex];
       onUpdateChecklistItem(task.id, itemIndex, !currentItem.completed);
-    } else {
-      // Fallback para compatibilidade
-      const updatedChecklist = task.checklist.map((item, index) => 
-        index === itemIndex ? { ...item, completed: !item.completed } : item
-      );
       
-      onUpdate({ checklist: updatedChecklist });
-    }
-    
-    // Check if all items are completed to auto-complete the task
-    const currentItem = task.checklist[itemIndex];
-    const willBeCompleted = !currentItem.completed;
-    const otherItems = task.checklist.filter((_, index) => index !== itemIndex);
-    const allOthersCompleted = otherItems.every(item => item.completed);
-    
-    if (willBeCompleted && allOthersCompleted && task.checklist.length > 0 && !task.completed) {
-      setTimeout(() => {
-        onToggle();
-        onGameEvent?.('task_completed');
-      }, 500);
+      // Check if all items are completed to auto-complete the task
+      const willBeCompleted = !currentItem.completed;
+      const otherItems = task.checklist.filter((_, index) => index !== itemIndex);
+      const allOthersCompleted = otherItems.every(item => item.completed);
+      
+      if (willBeCompleted && allOthersCompleted && task.checklist.length > 0 && !task.completed) {
+        setTimeout(() => {
+          onToggle();
+          onGameEvent?.('task_completed');
+        }, 500);
+      }
     }
   };
 
