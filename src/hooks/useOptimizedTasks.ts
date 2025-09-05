@@ -359,26 +359,11 @@ export function useOptimizedTasks() {
         return;
       }
 
-      // Create updated checklist for optimistic update
-      const updatedChecklist = [...task.checklist];
-      updatedChecklist[itemIndex] = { 
-        ...updatedChecklist[itemIndex], 
-        completed 
-      };
-
-      console.log('Checklist atualizado:', { updatedChecklist });
-
-      // Optimistic UI update
-      const updatedTask = { ...task, checklist: updatedChecklist };
-      setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
-
-      // Call the specific API method for updating checklist items
+      // Call the API method for updating checklist items
       const result = await supabaseDataService.updateChecklistItem(taskId, itemIndex, completed);
       
       if (!result.success) {
         console.error('Erro ao atualizar checklist:', result.error);
-        // Revert optimistic update
-        setTasks(prev => prev.map(t => t.id === taskId ? task : t));
         toast({
           title: 'Erro',
           description: result.error || 'Erro ao atualizar checklist',
@@ -387,9 +372,22 @@ export function useOptimizedTasks() {
         return;
       }
 
-      // Update with server response
-      setTasks(prev => prev.map(t => t.id === taskId ? result.data : t));
+      // Update state with server response (force re-render by creating new array)
+      setTasks(prevTasks => {
+        const newTasks = prevTasks.map(t => {
+          if (t.id === taskId) {
+            return { ...result.data };
+          }
+          return t;
+        });
+        return [...newTasks]; // Force new array reference
+      });
+      
       console.log('Checklist atualizado com sucesso');
+      
+      // Force cache refresh
+      setLastSyncTime(new Date());
+      
     } catch (error) {
       console.error('Erro inesperado ao atualizar checklist:', error);
       toast({
