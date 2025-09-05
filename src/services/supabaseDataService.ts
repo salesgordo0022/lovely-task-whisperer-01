@@ -723,9 +723,25 @@ export class SupabaseDataService {
 
   async updateChecklistItem(taskId: string, itemIndex: number, completed: boolean): Promise<ApiResponse<Task>> {
     try {
-      // First get the task to access its checklist
-      const taskResponse = await this.getTaskById(taskId);
-      if (!taskResponse.success || !taskResponse.data) {
+      // Get the task to access its checklist
+      const { data: task, error: taskError } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          task_checklist_items (*)
+        `)
+        .eq('id', taskId)
+        .maybeSingle();
+
+      if (taskError) {
+        return {
+          data: {} as Task,
+          success: false,
+          error: taskError.message
+        };
+      }
+
+      if (!task) {
         return {
           data: {} as Task,
           success: false,
@@ -733,8 +749,8 @@ export class SupabaseDataService {
         };
       }
 
-      const task = taskResponse.data;
-      if (!task.checklist || itemIndex >= task.checklist.length) {
+      // Check if checklist item exists
+      if (!task.task_checklist_items || itemIndex >= task.task_checklist_items.length) {
         return {
           data: {} as Task,
           success: false,
@@ -742,10 +758,10 @@ export class SupabaseDataService {
         };
       }
 
-      const item = task.checklist[itemIndex];
+      const item = task.task_checklist_items[itemIndex];
       
-      // Update the specific checklist item
-      const { error } = await supabase
+      // Update the specific checklist item directly
+      const { error: updateError } = await supabase
         .from('task_checklist_items')
         .update({ 
           completed,
@@ -753,21 +769,60 @@ export class SupabaseDataService {
         })
         .eq('id', item.id);
 
-      if (error) {
+      if (updateError) {
         return {
           data: {} as Task,
           success: false,
-          error: error.message
+          error: updateError.message
         };
       }
 
-      // Return the updated task
-      return await this.getTaskById(taskId);
+      // Get the updated task with all checklist items
+      const { data: updatedTask, error: fetchError } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          task_checklist_items (*)
+        `)
+        .eq('id', taskId)
+        .maybeSingle();
+
+      if (fetchError || !updatedTask) {
+        return {
+          data: {} as Task,
+          success: false,
+          error: 'Erro ao buscar tarefa atualizada'
+        };
+      }
+
+      // Transform to expected format
+      const transformedTask: Task = {
+        ...updatedTask,
+        category: updatedTask.category as TaskCategory,
+        priority: updatedTask.priority as TaskPriority,
+        isUrgent: updatedTask.is_urgent,
+        isImportant: updatedTask.is_important,
+        start_date: updatedTask.start_date ? new Date(updatedTask.start_date) : undefined,
+        due_date: updatedTask.due_date ? new Date(updatedTask.due_date) : undefined,
+        completed_at: updatedTask.completed_at ? new Date(updatedTask.completed_at) : undefined,
+        created_at: new Date(updatedTask.created_at),
+        updated_at: new Date(updatedTask.updated_at),
+        checklist: (updatedTask.task_checklist_items || []).map((item: any) => ({
+          ...item,
+          created_at: new Date(item.created_at),
+          updated_at: new Date(item.updated_at)
+        }))
+      };
+
+      return {
+        data: transformedTask,
+        success: true
+      };
     } catch (error) {
       return {
         data: {} as Task,
         success: false,
-        error: 'Erro ao atualizar item do checklist'
+        error: 'Erro inesperado ao atualizar item do checklist'
       };
     }
   }
