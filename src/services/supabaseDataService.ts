@@ -273,13 +273,21 @@ export class SupabaseDataService {
           *,
           task_checklist_items (*)
         `)
-        .single();
+        .maybeSingle();
 
       if (error) {
         return {
           data: {} as Task,
           success: false,
           error: error.message
+        };
+      }
+
+      if (!data) {
+        return {
+          data: {} as Task,
+          success: false,
+          error: 'Tarefa não encontrada ou sem permissão para atualizar'
         };
       }
 
