@@ -540,34 +540,6 @@ export class SupabaseDataService {
     }
   }
 
-  async updateChecklistItem(itemId: string, completed: boolean): Promise<ApiResponse<void>> {
-    try {
-      const { error } = await supabase
-        .from('task_checklist_items')
-        .update({ completed, updated_at: new Date().toISOString() })
-        .eq('id', itemId);
-
-      if (error) {
-        return {
-          data: undefined,
-          success: false,
-          error: error.message
-        };
-      }
-
-      return {
-        data: undefined,
-        success: true,
-        message: 'Item do checklist atualizado com sucesso'
-      };
-    } catch (error) {
-      return {
-        data: undefined,
-        success: false,
-        error: 'Erro ao atualizar item do checklist'
-      };
-    }
-  }
 
   // ============= NOTES MANAGEMENT =============
   
@@ -737,6 +709,57 @@ export class SupabaseDataService {
         data: undefined,
         success: false,
         error: 'Erro ao excluir anotação'
+      };
+    }
+  }
+
+  async updateChecklistItem(taskId: string, itemIndex: number, completed: boolean): Promise<ApiResponse<Task>> {
+    try {
+      // First get the task to access its checklist
+      const taskResponse = await this.getTaskById(taskId);
+      if (!taskResponse.success || !taskResponse.data) {
+        return {
+          data: {} as Task,
+          success: false,
+          error: 'Tarefa não encontrada'
+        };
+      }
+
+      const task = taskResponse.data;
+      if (!task.checklist || itemIndex >= task.checklist.length) {
+        return {
+          data: {} as Task,
+          success: false,
+          error: 'Item do checklist não encontrado'
+        };
+      }
+
+      const item = task.checklist[itemIndex];
+      
+      // Update the specific checklist item
+      const { error } = await supabase
+        .from('task_checklist_items')
+        .update({ 
+          completed,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', item.id);
+
+      if (error) {
+        return {
+          data: {} as Task,
+          success: false,
+          error: error.message
+        };
+      }
+
+      // Return the updated task
+      return await this.getTaskById(taskId);
+    } catch (error) {
+      return {
+        data: {} as Task,
+        success: false,
+        error: 'Erro ao atualizar item do checklist'
       };
     }
   }

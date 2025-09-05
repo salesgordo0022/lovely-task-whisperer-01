@@ -349,19 +349,56 @@ export function useOptimizedTasks() {
 
   // Atualizar item do checklist - funcionalidade corrigida
   const updateChecklistItem = useCallback(async (taskId: string, itemIndex: number, completed: boolean) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task || !task.checklist || itemIndex < 0 || itemIndex >= task.checklist.length) {
-      console.warn('Tarefa ou item do checklist não encontrado:', { taskId, itemIndex, task });
-      return;
+    console.log('Atualizando checklist:', { taskId, itemIndex, completed });
+    
+    try {
+      // Find the task in current state
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !task.checklist || itemIndex >= task.checklist.length) {
+        console.error('Tarefa ou item do checklist não encontrado');
+        return;
+      }
+
+      // Create updated checklist for optimistic update
+      const updatedChecklist = [...task.checklist];
+      updatedChecklist[itemIndex] = { 
+        ...updatedChecklist[itemIndex], 
+        completed 
+      };
+
+      console.log('Checklist atualizado:', { updatedChecklist });
+
+      // Optimistic UI update
+      const updatedTask = { ...task, checklist: updatedChecklist };
+      setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
+
+      // Call the specific API method for updating checklist items
+      const result = await supabaseDataService.updateChecklistItem(taskId, itemIndex, completed);
+      
+      if (!result.success) {
+        console.error('Erro ao atualizar checklist:', result.error);
+        // Revert optimistic update
+        setTasks(prev => prev.map(t => t.id === taskId ? task : t));
+        toast({
+          title: 'Erro',
+          description: result.error || 'Erro ao atualizar checklist',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      // Update with server response
+      setTasks(prev => prev.map(t => t.id === taskId ? result.data : t));
+      console.log('Checklist atualizado com sucesso');
+    } catch (error) {
+      console.error('Erro inesperado ao atualizar checklist:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro inesperado ao atualizar checklist',
+        variant: 'destructive'
+      });
     }
-
-    const updatedChecklist = task.checklist.map((item, index) => 
-      index === itemIndex ? { ...item, completed } : item
-    );
-
-    console.log('Atualizando checklist:', { taskId, itemIndex, completed, updatedChecklist });
-    await updateTask(taskId, { checklist: updatedChecklist });
-  }, [tasks, updateTask]);
+  }, [tasks, toast]);
 
   // Aliases para compatibilidade backward
   const createTask = addTask;
