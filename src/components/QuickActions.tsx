@@ -2,13 +2,13 @@ import { TaskFilters } from '@/types/task';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Home, Briefcase, Calendar, Clock, AlertTriangle } from 'lucide-react';
+import { Search, Filter, Home, Briefcase, Calendar, Clock, AlertTriangle, GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface QuickActionsProps {
-  activeCategory: 'personal' | 'work' | 'agenda' | 'all';
-  onCategoryChange: (category: 'personal' | 'work' | 'agenda' | 'all') => void;
+  activeCategory: 'personal' | 'work' | 'agenda' | 'studies' | 'all';
+  onCategoryChange: (category: 'personal' | 'work' | 'agenda' | 'studies' | 'all') => void;
   filters: TaskFilters;
   onFiltersChange: (filters: TaskFilters) => void;
 }
@@ -26,6 +26,7 @@ export function QuickActions({
     { key: 'personal' as const, label: 'Pessoal', icon: Home },
     { key: 'work' as const, label: 'Trabalho', icon: Briefcase },
     { key: 'agenda' as const, label: 'Compromissos', icon: Calendar },
+    { key: 'studies' as const, label: 'Estudos', icon: GraduationCap },
   ];
 
   const quickFilters = [

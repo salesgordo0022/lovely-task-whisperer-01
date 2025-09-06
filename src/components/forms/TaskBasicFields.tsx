@@ -30,6 +30,7 @@ export function TaskBasicFields({
     { value: 'personal', label: '🏠 Pessoal' },
     { value: 'work', label: '💼 Trabalho' },
     { value: 'agenda', label: '📅 Compromissos & Reuniões' },
+    { value: 'studies', label: '🎓 Meus Estudos' },
   ];
 
   const priorities: { value: TaskPriority; label: string }[] = [

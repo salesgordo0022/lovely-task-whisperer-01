@@ -149,19 +149,24 @@ export type Database = {
           category: string
           completed: boolean | null
           completed_at: string | null
+          course: string | null
           created_at: string | null
           description: string | null
           due_date: string | null
           estimated_time: number | null
           id: string
+          institution: string | null
           is_important: boolean | null
           is_urgent: boolean | null
           location: string | null
           meeting_notes: string | null
           meeting_url: string | null
           priority: string
+          professor: string | null
           reminder_minutes: number | null
+          semester: string | null
           start_date: string | null
+          subject: string | null
           title: string
           updated_at: string | null
           user_id: string
@@ -172,19 +177,24 @@ export type Database = {
           category: string
           completed?: boolean | null
           completed_at?: string | null
+          course?: string | null
           created_at?: string | null
           description?: string | null
           due_date?: string | null
           estimated_time?: number | null
           id?: string
+          institution?: string | null
           is_important?: boolean | null
           is_urgent?: boolean | null
           location?: string | null
           meeting_notes?: string | null
           meeting_url?: string | null
           priority: string
+          professor?: string | null
           reminder_minutes?: number | null
+          semester?: string | null
           start_date?: string | null
+          subject?: string | null
           title: string
           updated_at?: string | null
           user_id: string
@@ -195,19 +205,24 @@ export type Database = {
           category?: string
           completed?: boolean | null
           completed_at?: string | null
+          course?: string | null
           created_at?: string | null
           description?: string | null
           due_date?: string | null
           estimated_time?: number | null
           id?: string
+          institution?: string | null
           is_important?: boolean | null
           is_urgent?: boolean | null
           location?: string | null
           meeting_notes?: string | null
           meeting_url?: string | null
           priority?: string
+          professor?: string | null
           reminder_minutes?: number | null
+          semester?: string | null
           start_date?: string | null
+          subject?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string

@@ -1,7 +1,7 @@
 
 import { SyncableEntity, QueryFilters } from './database';
 
-export type TaskCategory = 'personal' | 'work' | 'agenda';
+export type TaskCategory = 'personal' | 'work' | 'agenda' | 'studies';
 
 export type TaskPriority = 'urgent' | 'important' | 'normal';
 
@@ -34,6 +34,13 @@ export interface Task extends SyncableEntity {
   attendees?: string[]; // Lista de participantes
   meeting_notes?: string; // Notas da reunião
   reminder_minutes?: number; // Lembrete em minutos antes
+  
+  // Campos específicos para estudos (categoria studies)
+  institution?: string; // escola, faculdade, universidade
+  course?: string; // curso/disciplina
+  subject?: string; // matéria específica
+  semester?: string; // semestre/período
+  professor?: string; // professor responsável
 }
 
 export type ViewMode = 'productivity' | 'calendar' | 'focus' | 'eisenhower' | 'reports' | 'goals' | 'ai' | 'completed' | 'process' | 'notes';
@@ -81,6 +88,13 @@ export interface CreateTaskDTO {
   attendees?: string[];
   meeting_notes?: string;
   reminder_minutes?: number;
+  
+  // Campos específicos para estudos
+  institution?: string;
+  course?: string;
+  subject?: string;
+  semester?: string;
+  professor?: string;
 }
 
 export interface UpdateTaskDTO {
@@ -103,6 +117,13 @@ export interface UpdateTaskDTO {
   attendees?: string[];
   meeting_notes?: string;
   reminder_minutes?: number;
+  
+  // Campos específicos para estudos
+  institution?: string;
+  course?: string;
+  subject?: string;
+  semester?: string;
+  professor?: string;
 }
 
 // Estatísticas agregadas

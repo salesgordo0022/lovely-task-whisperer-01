@@ -8,6 +8,7 @@ import { MemoizedCategorySection } from './optimized/MemoizedCategorySection';
 import { CompletedTasksSection } from './CompletedTasksSection';
 import { QuickActions } from './QuickActions';
 import { TaskCreateForm } from './TaskCreateForm';
+import { CategorySettingsModal } from './CategorySettingsModal';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import {
@@ -39,7 +40,7 @@ const ViewLoader = () => (
 const TaskAppContent = memo(function TaskAppContent() {
   const [viewMode, setViewMode] = useState<ViewMode>('productivity');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<'personal' | 'work' | 'agenda' | 'all'>('all');
+  const [activeCategory, setActiveCategory] = useState<'personal' | 'work' | 'agenda' | 'studies' | 'all'>('all');
   const taskManager = useTasks();
 
   // Memoização para evitar re-renders desnecessários
@@ -62,6 +63,9 @@ const TaskAppContent = memo(function TaskAppContent() {
     agenda: viewMode === 'productivity' 
       ? taskManager.allTasks.filter(t => t.category === 'agenda' && !t.completed)
       : taskManager.allTasks.filter(t => t.category === 'agenda'),
+    studies: viewMode === 'productivity' 
+      ? taskManager.allTasks.filter(t => t.category === 'studies' && !t.completed)
+      : taskManager.allTasks.filter(t => t.category === 'studies'),
   }), [taskManager.allTasks, viewMode]);
 
   // Memoização das funções de callback
@@ -74,7 +78,7 @@ const TaskAppContent = memo(function TaskAppContent() {
     setViewMode(mode);
   }, []);
 
-  const handleCategoryChange = useCallback((category: 'personal' | 'work' | 'agenda' | 'all') => {
+  const handleCategoryChange = useCallback((category: 'personal' | 'work' | 'agenda' | 'studies' | 'all') => {
     setActiveCategory(category);
   }, []);
 
@@ -106,8 +110,11 @@ const TaskAppContent = memo(function TaskAppContent() {
                 onFiltersChange={taskManager.setFilters}
               />
               
-              {/* Botão flutuante otimizado para todas as telas */}
-              <div className="flex justify-end mt-3 sm:mt-4">
+              {/* Controles de categoria e botão de criar */}
+              <div className="flex justify-between items-center mt-3 sm:mt-4">
+                <CategorySettingsModal />
+                
+                <div className="flex gap-2">
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
@@ -137,8 +144,9 @@ const TaskAppContent = memo(function TaskAppContent() {
                       <DialogTitle className="text-lg sm:text-xl">Criar Nova Tarefa</DialogTitle>
                     </DialogHeader>
                     <TaskCreateForm onSubmit={handleTaskCreate} />
-                  </DialogContent>
+                    </DialogContent>
                 </Dialog>
+                </div>
               </div>
             </div>
 
@@ -178,16 +186,28 @@ const TaskAppContent = memo(function TaskAppContent() {
                     onDeleteTask={taskManager.deleteTask}
                     onUpdateChecklistItem={taskManager.updateChecklistItem}
                   />
+                  
+                  <MemoizedCategorySection
+                    title="🎓 Meus Estudos"
+                    category="studies"
+                    tasks={categoryTasks.studies}
+                    stats={taskManager.tasksByCategory.studies}
+                    onToggleTask={taskManager.toggleTask}
+                    onUpdateTask={taskManager.updateTask}
+                    onDeleteTask={taskManager.deleteTask}
+                    onUpdateChecklistItem={taskManager.updateChecklistItem}
+                  />
                 </>
               ) : (
                 <MemoizedCategorySection
                   title={
                     activeCategory === 'personal' ? '🏠 Pessoal' :
-                    activeCategory === 'work' ? '💼 Trabalho' : '📅 Compromissos & Reuniões'
+                    activeCategory === 'work' ? '💼 Trabalho' : 
+                    activeCategory === 'agenda' ? '📅 Compromissos & Reuniões' : '🎓 Meus Estudos'
                   }
-                  category={activeCategory as 'personal' | 'work' | 'agenda'}
+                  category={activeCategory as 'personal' | 'work' | 'agenda' | 'studies'}
                   tasks={filteredTasks}
-                  stats={taskManager.tasksByCategory[activeCategory as 'personal' | 'work' | 'agenda']}
+                  stats={taskManager.tasksByCategory[activeCategory as 'personal' | 'work' | 'agenda' | 'studies']}
                   onToggleTask={taskManager.toggleTask}
                   onUpdateTask={taskManager.updateTask}
                   onDeleteTask={taskManager.deleteTask}
@@ -232,14 +252,25 @@ const TaskAppContent = memo(function TaskAppContent() {
                   onDeleteTask={taskManager.deleteTask}
                   onUpdateChecklistItem={taskManager.updateChecklistItem}
                 />
+                
+                <CompletedTasksSection
+                  title="🎓 Meus Estudos"
+                  category="studies"
+                  tasks={taskManager.allTasks.filter(t => t.category === 'studies' && t.completed)}
+                  onToggleTask={taskManager.toggleTask}
+                  onUpdateTask={taskManager.updateTask}
+                  onDeleteTask={taskManager.deleteTask}
+                  onUpdateChecklistItem={taskManager.updateChecklistItem}
+                />
               </>
             ) : (
               <CompletedTasksSection
                 title={
                   activeCategory === 'personal' ? '🏠 Pessoal' :
-                  activeCategory === 'work' ? '💼 Trabalho' : '📅 Compromissos & Reuniões'
+                  activeCategory === 'work' ? '💼 Trabalho' : 
+                  activeCategory === 'agenda' ? '📅 Compromissos & Reuniões' : '🎓 Meus Estudos'
                 }
-                category={activeCategory as 'personal' | 'work' | 'agenda'}
+                category={activeCategory as 'personal' | 'work' | 'agenda' | 'studies'}
                 tasks={taskManager.allTasks.filter(t => t.category === activeCategory && t.completed)}
                 onToggleTask={taskManager.toggleTask}
                 onUpdateTask={taskManager.updateTask}

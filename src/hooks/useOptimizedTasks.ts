@@ -4,6 +4,7 @@ import { supabaseDataService } from '@/services/supabaseDataService';
 import { useToast } from './use-toast';
 import { useGameification } from './useGameification';
 import { useAuth } from './useAuth';
+import { useRealTimeUpdates } from './useRealTimeUpdates';
 
 // Cache para otimização
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
@@ -22,6 +23,53 @@ export function useOptimizedTasks() {
 
   // Cache key baseada no usuário
   const cacheKey = user?.id || 'anonymous';
+
+  // Real-time updates
+  const handleRealTimeTaskUpdate = useCallback((updatedTask: Task) => {
+    setTasks(prevTasks => {
+      const taskIndex = prevTasks.findIndex(t => t.id === updatedTask.id);
+      if (taskIndex >= 0) {
+        const newTasks = [...prevTasks];
+        newTasks[taskIndex] = updatedTask;
+        return newTasks;
+      }
+      return prevTasks;
+    });
+    // Invalidar cache
+    tasksCache.delete(cacheKey);
+  }, [cacheKey]);
+
+  const handleRealTimeTaskInsert = useCallback((newTask: Task) => {
+    if (newTask.user_id === user?.id) {
+      setTasks(prevTasks => {
+        const exists = prevTasks.some(t => t.id === newTask.id);
+        if (!exists) {
+          return [...prevTasks, newTask];
+        }
+        return prevTasks;
+      });
+      // Invalidar cache
+      tasksCache.delete(cacheKey);
+    }
+  }, [user?.id, cacheKey]);
+
+  const handleRealTimeTaskDelete = useCallback((taskId: string) => {
+    setTasks(prevTasks => prevTasks.filter(t => t.id !== taskId));
+    // Invalidar cache
+    tasksCache.delete(cacheKey);
+  }, [cacheKey]);
+
+  const handleRealTimeChecklistUpdate = useCallback((taskId: string) => {
+    // Recarregar a tarefa específica para pegar o checklist atualizado
+    loadTasks(true);
+  }, []);
+
+  useRealTimeUpdates({
+    onTaskUpdate: handleRealTimeTaskUpdate,
+    onTaskInsert: handleRealTimeTaskInsert,
+    onTaskDelete: handleRealTimeTaskDelete,
+    onChecklistUpdate: handleRealTimeChecklistUpdate,
+  });
 
   // Carregar tarefas com cache otimizado
   const loadTasks = useCallback(async (forceRefresh = false) => {
@@ -320,6 +368,12 @@ export function useOptimizedTasks() {
       },
       agenda: {
         tasks: tasks.filter(t => t.category === 'agenda'),
+        total: 0,
+        completed: 0,
+        urgent: 0
+      },
+      studies: {
+        tasks: tasks.filter(t => t.category === 'studies'),
         total: 0,
         completed: 0,
         urgent: 0
