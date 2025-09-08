@@ -40,7 +40,9 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					light: 'hsl(var(--primary-light))',
+					dark: 'hsl(var(--primary-dark))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -56,7 +58,17 @@ export default {
 				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
+					foreground: 'hsl(var(--accent-foreground))',
+					light: 'hsl(var(--accent-light))'
+				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))',
+					light: 'hsl(var(--success-light))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -78,15 +90,23 @@ export default {
 				},
 				work: {
 					DEFAULT: 'hsl(var(--work))',
-					foreground: 'hsl(var(--work-foreground))'
+					foreground: 'hsl(var(--work-foreground))',
+					border: 'hsl(var(--work-border))'
 				},
 				personal: {
 					DEFAULT: 'hsl(var(--personal))',
-					foreground: 'hsl(var(--personal-foreground))'
+					foreground: 'hsl(var(--personal-foreground))',
+					border: 'hsl(var(--personal-border))'
 				},
 				agenda: {
 					DEFAULT: 'hsl(var(--agenda))',
-					foreground: 'hsl(var(--agenda-foreground))'
+					foreground: 'hsl(var(--agenda-foreground))',
+					border: 'hsl(var(--agenda-border))'
+				},
+				studies: {
+					DEFAULT: 'hsl(var(--studies))',
+					foreground: 'hsl(var(--studies-foreground))',
+					border: 'hsl(var(--studies-border))'
 				}
 			},
 			borderRadius: {
@@ -107,6 +127,24 @@ export default {
 			backgroundPosition: {
 				'pos-0': '0% 0%',
 				'pos-100': '100% 100%',
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-card': 'var(--gradient-card)',
+				'gradient-button': 'var(--gradient-button)',
+				'gradient-accent': 'var(--gradient-accent)',
+				'gradient-success': 'var(--gradient-success)'
+			},
+			boxShadow: {
+				'soft': 'var(--shadow-soft)',
+				'medium': 'var(--shadow-medium)',
+				'large': 'var(--shadow-large)',
+				'elevated': 'var(--shadow-elevated)',
+				'glow': 'var(--shadow-glow)',
+				'primary': 'var(--shadow-primary)',
+				'accent': 'var(--shadow-accent)',
+				'success': 'var(--shadow-success)'
 			},
 			keyframes: {
 				'accordion-down': {
