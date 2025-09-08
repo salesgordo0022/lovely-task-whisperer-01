@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Filter, Home, Briefcase, Calendar, Clock, AlertTriangle, GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useCategorySettings } from '@/hooks/useCategorySettings';
 
 interface QuickActionsProps {
   activeCategory: 'personal' | 'work' | 'agenda' | 'studies' | 'all';
@@ -20,14 +21,20 @@ export function QuickActions({
   onFiltersChange 
 }: QuickActionsProps) {
   const [searchInput, setSearchInput] = useState(filters.search || '');
+  const { getEnabledCategories } = useCategorySettings();
 
-  const categories = [
+  const allCategories = [
     { key: 'all' as const, label: 'Todas', icon: Filter },
     { key: 'personal' as const, label: 'Pessoal', icon: Home },
     { key: 'work' as const, label: 'Trabalho', icon: Briefcase },
     { key: 'agenda' as const, label: 'Compromissos', icon: Calendar },
     { key: 'studies' as const, label: 'Estudos', icon: GraduationCap },
   ];
+
+  const enabledCategories = getEnabledCategories();
+  const categories = allCategories.filter(cat => 
+    cat.key === 'all' || enabledCategories.includes(cat.key as any)
+  );
 
   const quickFilters = [
     {

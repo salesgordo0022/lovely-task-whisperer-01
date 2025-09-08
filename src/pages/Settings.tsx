@@ -8,6 +8,7 @@ import { ArrowLeft, Save, SettingsIcon, User, Lock, Shield, Bot } from 'lucide-r
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { CharacterSelector } from '@/components/CharacterSelector';
+import { CategoryToggleControls } from '@/components/CategoryToggleControls';
 import { AVAILABLE_CHARACTERS } from '@/types/character';
 
 interface UserSettings {
@@ -195,6 +196,27 @@ export default function Settings() {
                   Suas configurações são armazenadas localmente no seu dispositivo e não são compartilhadas.
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Configurações de Categorias */}
+          <Card className="macos-card-subtle lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <SettingsIcon className="w-5 h-5" />
+                Configurações das Categorias
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg mb-6">
+                <p className="text-sm font-medium mb-1">
+                  Personalize suas categorias de tarefas
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Ative ou desative as categorias que você usa para manter sua interface organizada.
+                </p>
+              </div>
+              <CategoryToggleControls />
             </CardContent>
           </Card>
 

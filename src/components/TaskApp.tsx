@@ -9,6 +9,7 @@ import { CompletedTasksSection } from './CompletedTasksSection';
 import { QuickActions } from './QuickActions';
 import { TaskCreateForm } from './TaskCreateForm';
 import { CategorySettingsModal } from './CategorySettingsModal';
+import { useCategorySettings } from '@/hooks/useCategorySettings';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import {
@@ -42,6 +43,7 @@ const TaskAppContent = memo(function TaskAppContent() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<'personal' | 'work' | 'agenda' | 'studies' | 'all'>('all');
   const taskManager = useTasks();
+  const { getEnabledCategories } = useCategorySettings();
 
   // Memoização para evitar re-renders desnecessários
   const filteredTasks = useMemo(() => {
@@ -154,49 +156,57 @@ const TaskAppContent = memo(function TaskAppContent() {
             <div className="responsive-gap flex flex-col pb-16 sm:pb-8">
               {activeCategory === 'all' ? (
                 <>
-                  <MemoizedCategorySection
-                    title="🏠 Pessoal"
-                    category="personal"
-                    tasks={categoryTasks.personal}
-                    stats={taskManager.tasksByCategory.personal}
-                    onToggleTask={taskManager.toggleTask}
-                    onUpdateTask={taskManager.updateTask}
-                    onDeleteTask={taskManager.deleteTask}
-                    onUpdateChecklistItem={taskManager.updateChecklistItem}
-                  />
+                  {getEnabledCategories().includes('personal') && (
+                    <MemoizedCategorySection
+                      title="🏠 Pessoal"
+                      category="personal"
+                      tasks={categoryTasks.personal}
+                      stats={taskManager.tasksByCategory.personal}
+                      onToggleTask={taskManager.toggleTask}
+                      onUpdateTask={taskManager.updateTask}
+                      onDeleteTask={taskManager.deleteTask}
+                      onUpdateChecklistItem={taskManager.updateChecklistItem}
+                    />
+                  )}
                   
-                  <MemoizedCategorySection
-                    title="💼 Trabalho"
-                    category="work"
-                    tasks={categoryTasks.work}
-                    stats={taskManager.tasksByCategory.work}
-                    onToggleTask={taskManager.toggleTask}
-                    onUpdateTask={taskManager.updateTask}
-                    onDeleteTask={taskManager.deleteTask}
-                    onUpdateChecklistItem={taskManager.updateChecklistItem}
-                  />
+                  {getEnabledCategories().includes('work') && (
+                    <MemoizedCategorySection
+                      title="💼 Trabalho"
+                      category="work"
+                      tasks={categoryTasks.work}
+                      stats={taskManager.tasksByCategory.work}
+                      onToggleTask={taskManager.toggleTask}
+                      onUpdateTask={taskManager.updateTask}
+                      onDeleteTask={taskManager.deleteTask}
+                      onUpdateChecklistItem={taskManager.updateChecklistItem}
+                    />
+                  )}
                   
-                  <MemoizedCategorySection
-                    title="📅 Compromissos & Reuniões"
-                    category="agenda"
-                    tasks={categoryTasks.agenda}
-                    stats={taskManager.tasksByCategory.agenda}
-                    onToggleTask={taskManager.toggleTask}
-                    onUpdateTask={taskManager.updateTask}
-                    onDeleteTask={taskManager.deleteTask}
-                    onUpdateChecklistItem={taskManager.updateChecklistItem}
-                  />
+                  {getEnabledCategories().includes('agenda') && (
+                    <MemoizedCategorySection
+                      title="📅 Compromissos & Reuniões"
+                      category="agenda"
+                      tasks={categoryTasks.agenda}
+                      stats={taskManager.tasksByCategory.agenda}
+                      onToggleTask={taskManager.toggleTask}
+                      onUpdateTask={taskManager.updateTask}
+                      onDeleteTask={taskManager.deleteTask}
+                      onUpdateChecklistItem={taskManager.updateChecklistItem}
+                    />
+                  )}
                   
-                  <MemoizedCategorySection
-                    title="🎓 Meus Estudos"
-                    category="studies"
-                    tasks={categoryTasks.studies}
-                    stats={taskManager.tasksByCategory.studies}
-                    onToggleTask={taskManager.toggleTask}
-                    onUpdateTask={taskManager.updateTask}
-                    onDeleteTask={taskManager.deleteTask}
-                    onUpdateChecklistItem={taskManager.updateChecklistItem}
-                  />
+                  {getEnabledCategories().includes('studies') && (
+                    <MemoizedCategorySection
+                      title="🎓 Meus Estudos"
+                      category="studies"
+                      tasks={categoryTasks.studies}
+                      stats={taskManager.tasksByCategory.studies}
+                      onToggleTask={taskManager.toggleTask}
+                      onUpdateTask={taskManager.updateTask}
+                      onDeleteTask={taskManager.deleteTask}
+                      onUpdateChecklistItem={taskManager.updateChecklistItem}
+                    />
+                  )}
                 </>
               ) : (
                 <MemoizedCategorySection
@@ -223,45 +233,53 @@ const TaskAppContent = memo(function TaskAppContent() {
           <div className="responsive-gap flex flex-col pb-16 sm:pb-8">
             {activeCategory === 'all' ? (
               <>
-                <CompletedTasksSection
-                  title="🏠 Pessoal"
-                  category="personal"
-                  tasks={taskManager.allTasks.filter(t => t.category === 'personal' && t.completed)}
-                  onToggleTask={taskManager.toggleTask}
-                  onUpdateTask={taskManager.updateTask}
-                  onDeleteTask={taskManager.deleteTask}
-                  onUpdateChecklistItem={taskManager.updateChecklistItem}
-                />
+                {getEnabledCategories().includes('personal') && (
+                  <CompletedTasksSection
+                    title="🏠 Pessoal"
+                    category="personal"
+                    tasks={taskManager.allTasks.filter(t => t.category === 'personal' && t.completed)}
+                    onToggleTask={taskManager.toggleTask}
+                    onUpdateTask={taskManager.updateTask}
+                    onDeleteTask={taskManager.deleteTask}
+                    onUpdateChecklistItem={taskManager.updateChecklistItem}
+                  />
+                )}
                 
-                <CompletedTasksSection
-                  title="💼 Trabalho"
-                  category="work"
-                  tasks={taskManager.allTasks.filter(t => t.category === 'work' && t.completed)}
-                  onToggleTask={taskManager.toggleTask}
-                  onUpdateTask={taskManager.updateTask}
-                  onDeleteTask={taskManager.deleteTask}
-                  onUpdateChecklistItem={taskManager.updateChecklistItem}
-                />
+                {getEnabledCategories().includes('work') && (
+                  <CompletedTasksSection
+                    title="💼 Trabalho"
+                    category="work"
+                    tasks={taskManager.allTasks.filter(t => t.category === 'work' && t.completed)}
+                    onToggleTask={taskManager.toggleTask}
+                    onUpdateTask={taskManager.updateTask}
+                    onDeleteTask={taskManager.deleteTask}
+                    onUpdateChecklistItem={taskManager.updateChecklistItem}
+                  />
+                )}
                 
-                <CompletedTasksSection
-                  title="📅 Compromissos & Reuniões"
-                  category="agenda"
-                  tasks={taskManager.allTasks.filter(t => t.category === 'agenda' && t.completed)}
-                  onToggleTask={taskManager.toggleTask}
-                  onUpdateTask={taskManager.updateTask}
-                  onDeleteTask={taskManager.deleteTask}
-                  onUpdateChecklistItem={taskManager.updateChecklistItem}
-                />
+                {getEnabledCategories().includes('agenda') && (
+                  <CompletedTasksSection
+                    title="📅 Compromissos & Reuniões"
+                    category="agenda"
+                    tasks={taskManager.allTasks.filter(t => t.category === 'agenda' && t.completed)}
+                    onToggleTask={taskManager.toggleTask}
+                    onUpdateTask={taskManager.updateTask}
+                    onDeleteTask={taskManager.deleteTask}
+                    onUpdateChecklistItem={taskManager.updateChecklistItem}
+                  />
+                )}
                 
-                <CompletedTasksSection
-                  title="🎓 Meus Estudos"
-                  category="studies"
-                  tasks={taskManager.allTasks.filter(t => t.category === 'studies' && t.completed)}
-                  onToggleTask={taskManager.toggleTask}
-                  onUpdateTask={taskManager.updateTask}
-                  onDeleteTask={taskManager.deleteTask}
-                  onUpdateChecklistItem={taskManager.updateChecklistItem}
-                />
+                {getEnabledCategories().includes('studies') && (
+                  <CompletedTasksSection
+                    title="🎓 Meus Estudos"
+                    category="studies"
+                    tasks={taskManager.allTasks.filter(t => t.category === 'studies' && t.completed)}
+                    onToggleTask={taskManager.toggleTask}
+                    onUpdateTask={taskManager.updateTask}
+                    onDeleteTask={taskManager.deleteTask}
+                    onUpdateChecklistItem={taskManager.updateChecklistItem}
+                  />
+                )}
               </>
             ) : (
               <CompletedTasksSection
