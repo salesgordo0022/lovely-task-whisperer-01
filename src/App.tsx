@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PerformanceMonitor } from "@/components/PerformanceMonitor";
+import { useSystemOptimization } from "@/hooks/useSystemOptimization";
 import { lazy, Suspense } from "react";
 
 // Lazy loading para otimização
@@ -31,7 +32,8 @@ const queryClient = new QueryClient({
 
 function ProtectedApp() {
   const { user, loading } = useAuth();
-
+  useSystemOptimization(); // Initialize system optimization
+  
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">

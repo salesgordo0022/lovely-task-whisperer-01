@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
+import { logger } from '@/utils/logger';
 
 interface CategorySettings {
   enabledCategories: {
@@ -36,7 +37,7 @@ export function useCategorySettings() {
           const parsed = JSON.parse(savedSettings);
           setSettings(prev => ({ ...prev, ...parsed }));
         } catch (error) {
-          console.error('Erro ao carregar configurações de categoria:', error);
+          logger.error('Erro ao carregar configurações de categoria', error);
         }
       }
       setIsLoading(false);
@@ -53,7 +54,7 @@ export function useCategorySettings() {
     try {
       localStorage.setItem(`category_settings_${user.id}`, JSON.stringify(updatedSettings));
     } catch (error) {
-      console.error('Erro ao salvar configurações de categoria:', error);
+      logger.error('Erro ao salvar configurações de categoria', error);
     }
   };
 

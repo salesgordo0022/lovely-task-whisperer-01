@@ -233,8 +233,8 @@ export class AIService {
         actions: data.actions || []
       };
     } catch (error) {
-      console.error('Erro na Edge Function:', error);
-      throw error;
+      // Error in Edge Function - fallback to local response
+      throw new Error('Serviço de IA temporariamente indisponível');
     }
   }
 
