@@ -21,15 +21,12 @@ export function AIChat({ tasks, stats, className, userName }: AIChatProps) {
   const { chatHistory, isLoading, sendMessage, clearHistory, initializeChat, character } = useCharacterChat(tasks, stats, displayName);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Debug do chat history
-  console.log('=== AIChat RENDER ===');
-  console.log('Total de mensagens no chat:', chatHistory.length);
-  console.log('Chat history:', chatHistory);
+  // Chat history management
 
   // Inicializar chat apenas uma vez
   useEffect(() => {
     if (character && chatHistory.length === 0) {
-      console.log('Inicializando chat para o personagem:', character.name);
+      // Initialize chat for character
       initializeChat();
     }
   }, [character?.id, chatHistory.length, initializeChat]); // Usar character.id para evitar re-renders
@@ -42,7 +39,7 @@ export function AIChat({ tasks, stats, className, userName }: AIChatProps) {
         if (scrollElement) {
           // Força o scroll para o final
           scrollElement.scrollTop = scrollElement.scrollHeight;
-          console.log('Auto-scroll executado, scrollTop:', scrollElement.scrollTop, 'scrollHeight:', scrollElement.scrollHeight);
+          // Auto-scroll to bottom
         }
       }
     };

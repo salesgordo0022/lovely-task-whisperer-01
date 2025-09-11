@@ -403,7 +403,7 @@ export function useOptimizedTasks() {
 
   // Atualizar item do checklist - funcionalidade corrigida
   const updateChecklistItem = useCallback(async (taskId: string, itemIndex: number, completed: boolean) => {
-    console.log('Atualizando checklist:', { taskId, itemIndex, completed });
+    // Update checklist item
     
     try {
       // Find the task in current state
@@ -437,7 +437,7 @@ export function useOptimizedTasks() {
         return [...newTasks]; // Force new array reference
       });
       
-      console.log('Checklist atualizado com sucesso');
+      // Checklist updated successfully
       
       // Force cache refresh
       setLastSyncTime(new Date());

@@ -10,11 +10,7 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message, character, displayName }: ChatMessageProps) {
-  console.log('=== RENDERIZANDO MENSAGEM ===');
-  console.log('Tipo:', message.isUser ? 'USUÁRIO' : 'IA');
-  console.log('Conteúdo:', message.content);
-  console.log('ID:', message.id);
-  console.log('Timestamp:', message.timestamp);
+  // Render chat message
   
   return (
     <div className={`flex gap-3 w-full mb-4 animate-macos-fade-in ${

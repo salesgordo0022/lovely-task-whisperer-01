@@ -23,7 +23,7 @@ export function ChatInput({ onSendMessage, character, isLoading }: ChatInputProp
     try {
       await onSendMessage(messageToSend);
     } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
+      // Handle error sending message
     }
     
     setTimeout(() => {

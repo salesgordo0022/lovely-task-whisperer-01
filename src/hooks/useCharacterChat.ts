@@ -41,14 +41,10 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
     };
 
     // Adicionar mensagem do usuário imediatamente ao estado
-    console.log('=== ENVIANDO MENSAGEM DO USUÁRIO ===');
-    console.log('Mensagem do usuário:', userMessage);
+    // Send user message
     
     setChatHistory(prev => {
-      console.log('Chat history ANTES de adicionar usuário:', prev.length, 'mensagens');
       const newHistory = [...prev, userMessage];
-      console.log('Chat history DEPOIS de adicionar usuário:', newHistory.length, 'mensagens');
-      console.log('Última mensagem adicionada:', newHistory[newHistory.length - 1]);
       return newHistory;
     });
 
@@ -150,14 +146,8 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
         characterEmoji: character.emoji
       };
 
-      // Adicionar resposta da IA
-      console.log('Adicionando resposta da IA:', aiMessage);
-      setChatHistory(prev => {
-        console.log('Estado anterior do chat (IA):', prev);
-        const newHistory = [...prev, aiMessage];
-        console.log('Novo estado do chat (IA):', newHistory);
-        return newHistory;
-      });
+      // Add AI response to chat history
+      setChatHistory(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Erro no chat:', error);
       

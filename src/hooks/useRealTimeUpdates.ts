@@ -17,7 +17,7 @@ export function useRealTimeUpdates({
 }: UseRealTimeUpdatesProps) {
   
   const handleTasksChanges = useCallback((payload: any) => {
-    console.log('Real-time task change:', payload);
+    // Handle real-time task changes
     
     switch (payload.eventType) {
       case 'INSERT':
@@ -39,7 +39,7 @@ export function useRealTimeUpdates({
   }, [onTaskInsert, onTaskUpdate, onTaskDelete]);
 
   const handleChecklistChanges = useCallback((payload: any) => {
-    console.log('Real-time checklist change:', payload);
+    // Handle real-time checklist changes
     
     if (onChecklistUpdate && payload.new?.task_id) {
       onChecklistUpdate(payload.new.task_id);
