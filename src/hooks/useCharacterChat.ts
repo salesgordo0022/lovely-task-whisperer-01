@@ -5,7 +5,7 @@ import { Task, ProductivityStats } from '@/types/task';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast } from './use-toast';
 import { useTasks } from './useTasks';
-import { useAuth } from './useAuth';
+
 
 export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userName?: string) {
   // Obter personagem selecionado das configurações
@@ -27,7 +27,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const taskManager = useTasks();
-  const { user } = useAuth();
+  
 
   const sendMessage = useCallback(async (message: string) => {
     if (!character || !message.trim()) return;
@@ -85,16 +85,41 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
           try {
             switch (action.type) {
               case 'CREATE_TASK':
-                // Adicionar user_id aos dados da tarefa
-                const taskWithUserId = {
-                  ...action.data,
-                  user_id: user?.id
-                };
-                await taskManager.addTask(taskWithUserId);
-                toast({
-                  title: "✅ Tarefa criada",
-                  description: `"${action.data.title}" foi adicionada pelo assistente.`,
-                });
+                // Log para debug
+                console.log('📝 Dados da tarefa recebidos da AI:', action.data);
+                
+                try {
+                  // Validar campos obrigatórios
+                  if (!action.data.title || !action.data.category || !action.data.priority) {
+                    console.error('❌ Dados inválidos:', { 
+                      hasTitle: !!action.data.title,
+                      hasCategory: !!action.data.category,
+                      hasPriority: !!action.data.priority
+                    });
+                    toast({
+                      title: "❌ Dados incompletos",
+                      description: "A tarefa precisa ter título, categoria e prioridade.",
+                      variant: "destructive"
+                    });
+                    break;
+                  }
+                  
+                  // O createTask já pega o user_id automaticamente
+                  const result = await taskManager.addTask(action.data);
+                  console.log('✅ Tarefa criada com sucesso:', result);
+                  
+                  toast({
+                    title: "✅ Tarefa criada",
+                    description: `"${action.data.title}" foi adicionada pelo assistente.`,
+                  });
+                } catch (error) {
+                  console.error('❌ Erro ao criar tarefa:', error);
+                  toast({
+                    title: "❌ Erro ao criar tarefa",
+                    description: "Não foi possível criar a tarefa. Tente novamente.",
+                    variant: "destructive"
+                  });
+                }
                 break;
               case 'COMPLETE_TASK':
                 await taskManager.toggleTask(action.data.id);
@@ -171,7 +196,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
     }
 
     setIsLoading(false);
-  }, [character, tasks, stats, chatHistory, setChatHistory, userName, taskManager, toast, user]);
+  }, [character, tasks, stats, chatHistory, setChatHistory, userName, taskManager, toast]);
 
   const clearHistory = useCallback(() => {
     setChatHistory([]);
