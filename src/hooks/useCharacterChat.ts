@@ -5,6 +5,7 @@ import { Task, ProductivityStats } from '@/types/task';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast } from './use-toast';
 import { useTasks } from './useTasks';
+import { useAuth } from './useAuth';
 
 export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userName?: string) {
   // Obter personagem selecionado das configurações
@@ -26,6 +27,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const taskManager = useTasks();
+  const { user } = useAuth();
 
   const sendMessage = useCallback(async (message: string) => {
     if (!character || !message.trim()) return;
@@ -83,7 +85,12 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
           try {
             switch (action.type) {
               case 'CREATE_TASK':
-                await taskManager.addTask(action.data); // Usar addTask ao invés de createTask
+                // Adicionar user_id aos dados da tarefa
+                const taskWithUserId = {
+                  ...action.data,
+                  user_id: user?.id
+                };
+                await taskManager.addTask(taskWithUserId);
                 toast({
                   title: "✅ Tarefa criada",
                   description: `"${action.data.title}" foi adicionada pelo assistente.`,
@@ -164,7 +171,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
     }
 
     setIsLoading(false);
-  }, [character, tasks, stats, chatHistory, setChatHistory, userName, taskManager, toast]);
+  }, [character, tasks, stats, chatHistory, setChatHistory, userName, taskManager, toast, user]);
 
   const clearHistory = useCallback(() => {
     setChatHistory([]);
