@@ -303,11 +303,12 @@ ${tasksContext}`;
           const [, title, category, priority, description] = parts;
           const taskData = {
             title: title.trim(),
-            category: category.trim(),
-            priority: priority.trim(),
+            category: category.trim() as 'personal' | 'work' | 'agenda' | 'studies',
+            priority: priority.trim() as 'urgent' | 'important' | 'normal',
             description: description.trim(),
             isUrgent: priority.trim() === 'urgent',
-            isImportant: priority.trim() === 'important' || priority.trim() === 'urgent'
+            isImportant: priority.trim() === 'important' || priority.trim() === 'urgent',
+            checklist: [] // Adicionar array vazio para checklist
           };
           
           console.log('Creating task action with data:', taskData);
