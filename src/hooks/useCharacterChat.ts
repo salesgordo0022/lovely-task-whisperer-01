@@ -79,8 +79,15 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
         dataActions
       );
 
+      console.log('🤖 AI Response received:', { 
+        hasResponse: !!result.response, 
+        hasActions: !!result.actions,
+        actionsCount: result.actions?.length || 0
+      });
+
       // Executar ações se houver
-      if (result.actions) {
+      if (result.actions && result.actions.length > 0) {
+        console.log('🎯 Processing', result.actions.length, 'actions from AI');
         for (const action of result.actions) {
           try {
             switch (action.type) {

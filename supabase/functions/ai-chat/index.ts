@@ -290,14 +290,17 @@ ${tasksContext}`;
     const actions = [];
     let cleanResponse = aiResponse;
 
+    console.log('🔍 AI Response raw:', aiResponse.substring(0, 200));
+
     // Detectar comandos de criação de tarefa
     const createMatches = aiResponse.match(/\[CREATE_TASK:([^|]+)\|([^|]+)\|([^|]+)\|([^\]]+)\]/g);
-    console.log('Create matches found:', createMatches);
+    console.log('🔍 Create matches found:', createMatches);
     
     if (createMatches) {
       for (const match of createMatches) {
         const parts = match.match(/\[CREATE_TASK:([^|]+)\|([^|]+)\|([^|]+)\|([^\]]+)\]/);
-        console.log('Processing create match:', match, 'Parts:', parts);
+        console.log('🔍 Processing create match:', match);
+        console.log('🔍 Parts extracted:', parts);
         
         if (parts) {
           const [, title, category, priority, description] = parts;
@@ -308,10 +311,10 @@ ${tasksContext}`;
             description: description.trim(),
             isUrgent: priority.trim() === 'urgent',
             isImportant: priority.trim() === 'important' || priority.trim() === 'urgent',
-            checklist: [] // Adicionar array vazio para checklist
+            checklist: []
           };
           
-          console.log('Creating task action with data:', taskData);
+          console.log('✅ Task data created:', JSON.stringify(taskData));
           actions.push({
             type: 'CREATE_TASK',
             data: taskData
@@ -319,6 +322,11 @@ ${tasksContext}`;
         }
         cleanResponse = cleanResponse.replace(match, '');
       }
+    }
+
+    console.log('📊 Total actions created:', actions.length);
+    if (actions.length > 0) {
+      console.log('📋 Actions to return:', JSON.stringify(actions));
     }
 
     // Detectar comandos de conclusão
@@ -351,12 +359,14 @@ ${tasksContext}`;
       }
     }
 
-    console.log('Actions processed:', actions.length);
-
-    return new Response(JSON.stringify({ 
+    const responseData = { 
       response: cleanResponse.trim(), 
       actions: actions.length > 0 ? actions : undefined 
-    }), {
+    };
+
+    console.log('📤 Sending response:', JSON.stringify(responseData).substring(0, 300));
+
+    return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
