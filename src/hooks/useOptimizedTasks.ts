@@ -116,7 +116,7 @@ export function useOptimizedTasks() {
     }
   }, [user, cacheKey, toast]);
 
-  // Adicionar tarefa com otimização otimista
+  // Adicionar tarefa - sem optimistic update para evitar conflitos
   const addTask = useCallback(async (taskData: CreateTaskDTO) => {
     if (!user) {
       console.error('❌ addTask: No user authenticated');
@@ -125,34 +125,7 @@ export function useOptimizedTasks() {
 
     console.log('🔵 addTask called with:', JSON.stringify(taskData, null, 2));
 
-    // Otimistic update
-    const tempId = `temp_${Date.now()}`;
-    const tempTask: Task = {
-      id: tempId,
-      user_id: user.id,
-      title: taskData.title,
-      description: taskData.description || null,
-      category: taskData.category,
-      priority: taskData.priority || 'normal',
-      completed: false,
-      due_date: taskData.due_date || null,
-      start_date: taskData.start_date || null,
-      estimated_time: taskData.estimated_time || null,
-      actual_time: null,
-      isUrgent: taskData.isUrgent || false,
-      isImportant: taskData.isImportant || false,
-      created_at: new Date(),
-      updated_at: new Date(),
-      completed_at: null,
-      meeting_url: taskData.meeting_url || null,
-      location: taskData.location || null,
-      attendees: taskData.attendees || [],
-      meeting_notes: taskData.meeting_notes || null,
-      reminder_minutes: taskData.reminder_minutes || null,
-      checklist: []
-    };
-
-    setTasks(prevTasks => [...prevTasks, tempTask]);
+    setIsLoading(true);
 
     try {
       const result = await supabaseDataService.createTask(taskData);
@@ -160,15 +133,8 @@ export function useOptimizedTasks() {
       if (result.success) {
         console.log('✅ addTask: Task created successfully:', result.data.id);
         
-        // Substituir tarefa temporária pela real
-        setTasks(prevTasks => 
-          prevTasks.map(task => 
-            task.id === tempId ? result.data : task
-          )
-        );
-
-        // Limpar cache para recarregar
-        tasksCache.delete(cacheKey);
+        // Força recarregamento das tarefas para garantir sincronia
+        await loadTasks(true);
 
         toast({
           title: 'Sucesso',
@@ -182,9 +148,6 @@ export function useOptimizedTasks() {
     } catch (error) {
       console.error('❌ addTask error:', error);
       
-      // Reverter otimistic update
-      setTasks(prevTasks => prevTasks.filter(task => task.id !== tempId));
-      
       const errorMessage = error instanceof Error ? error.message : 'Erro ao criar tarefa';
       toast({
         title: 'Erro',
@@ -193,8 +156,10 @@ export function useOptimizedTasks() {
       });
       
       return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
     }
-  }, [user, cacheKey, toast]);
+  }, [user, toast, loadTasks]);
 
   // Atualizar tarefa com otimização otimista
   const updateTask = useCallback(async (taskId: string, updates: UpdateTaskDTO) => {
