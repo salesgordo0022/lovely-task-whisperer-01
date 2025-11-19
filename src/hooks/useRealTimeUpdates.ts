@@ -17,20 +17,43 @@ export function useRealTimeUpdates({
 }: UseRealTimeUpdatesProps) {
   
   const handleTasksChanges = useCallback((payload: any) => {
-    // Handle real-time task changes
+    console.log('🔄 Real-time task change:', payload.eventType);
     
     switch (payload.eventType) {
       case 'INSERT':
+        console.log('✨ New task inserted:', payload.new);
         if (onTaskInsert && payload.new) {
-          onTaskInsert(payload.new as Task);
+          const task = {
+            ...payload.new,
+            isUrgent: payload.new.is_urgent,
+            isImportant: payload.new.is_important,
+            start_date: payload.new.start_date ? new Date(payload.new.start_date) : undefined,
+            due_date: payload.new.due_date ? new Date(payload.new.due_date) : undefined,
+            created_at: new Date(payload.new.created_at),
+            updated_at: new Date(payload.new.updated_at),
+            checklist: []
+          };
+          onTaskInsert(task as Task);
         }
         break;
       case 'UPDATE':
+        console.log('🔄 Task updated:', payload.new);
         if (onTaskUpdate && payload.new) {
-          onTaskUpdate(payload.new as Task);
+          const task = {
+            ...payload.new,
+            isUrgent: payload.new.is_urgent,
+            isImportant: payload.new.is_important,
+            start_date: payload.new.start_date ? new Date(payload.new.start_date) : undefined,
+            due_date: payload.new.due_date ? new Date(payload.new.due_date) : undefined,
+            created_at: new Date(payload.new.created_at),
+            updated_at: new Date(payload.new.updated_at),
+            checklist: []
+          };
+          onTaskUpdate(task as Task);
         }
         break;
       case 'DELETE':
+        console.log('🗑️ Task deleted:', payload.old?.id);
         if (onTaskDelete && payload.old) {
           onTaskDelete(payload.old.id);
         }
@@ -39,7 +62,7 @@ export function useRealTimeUpdates({
   }, [onTaskInsert, onTaskUpdate, onTaskDelete]);
 
   const handleChecklistChanges = useCallback((payload: any) => {
-    // Handle real-time checklist changes
+    console.log('✅ Checklist change:', payload.eventType);
     
     if (onChecklistUpdate && payload.new?.task_id) {
       onChecklistUpdate(payload.new.task_id);

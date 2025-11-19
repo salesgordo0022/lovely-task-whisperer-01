@@ -115,11 +115,11 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
                   const result = await taskManager.addTask(action.data);
                   
                   if (result?.success) {
-                    console.log('✅ Tarefa criada com sucesso:', result.data);
+                    console.log('✅ Tarefa criada com sucesso via IA:', result.data);
                     
                     toast({
                       title: "✅ Tarefa criada",
-                      description: `"${action.data.title}" foi adicionada pelo assistente.`,
+                      description: `"${action.data.title}" foi adicionada com sucesso!`,
                     });
                   } else {
                     console.error('❌ Erro ao criar tarefa:', result?.error || 'Erro desconhecido');
@@ -133,7 +133,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
                   console.error('❌ Exceção ao criar tarefa:', error);
                   toast({
                     title: "❌ Erro ao criar tarefa",
-                    description: "Não foi possível criar a tarefa. Tente novamente.",
+                    description: error instanceof Error ? error.message : "Erro desconhecido ao criar tarefa.",
                     variant: "destructive"
                   });
                 }
