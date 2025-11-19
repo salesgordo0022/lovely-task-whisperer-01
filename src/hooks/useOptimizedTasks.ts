@@ -118,7 +118,12 @@ export function useOptimizedTasks() {
 
   // Adicionar tarefa com otimização otimista
   const addTask = useCallback(async (taskData: CreateTaskDTO) => {
-    if (!user) return;
+    if (!user) {
+      console.error('❌ addTask: No user authenticated');
+      return { success: false, error: 'Usuário não autenticado' };
+    }
+
+    console.log('🔵 addTask called with:', JSON.stringify(taskData, null, 2));
 
     // Otimistic update
     const tempId = `temp_${Date.now()}`;
@@ -153,6 +158,8 @@ export function useOptimizedTasks() {
       const result = await supabaseDataService.createTask(taskData);
       
       if (result.success) {
+        console.log('✅ addTask: Task created successfully:', result.data.id);
+        
         // Substituir tarefa temporária pela real
         setTasks(prevTasks => 
           prevTasks.map(task => 
@@ -167,10 +174,14 @@ export function useOptimizedTasks() {
           title: 'Sucesso',
           description: 'Tarefa criada com sucesso!'
         });
+        
+        return { success: true, data: result.data };
       } else {
         throw new Error(result.error);
       }
     } catch (error) {
+      console.error('❌ addTask error:', error);
+      
       // Reverter otimistic update
       setTasks(prevTasks => prevTasks.filter(task => task.id !== tempId));
       
@@ -180,6 +191,8 @@ export function useOptimizedTasks() {
         description: errorMessage,
         variant: 'destructive'
       });
+      
+      return { success: false, error: errorMessage };
     }
   }, [user, cacheKey, toast]);
 

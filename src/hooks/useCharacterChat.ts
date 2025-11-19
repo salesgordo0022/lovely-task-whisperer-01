@@ -113,14 +113,24 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
                   
                   // O createTask já pega o user_id automaticamente
                   const result = await taskManager.addTask(action.data);
-                  console.log('✅ Tarefa criada com sucesso:', result);
                   
-                  toast({
-                    title: "✅ Tarefa criada",
-                    description: `"${action.data.title}" foi adicionada pelo assistente.`,
-                  });
+                  if (result?.success) {
+                    console.log('✅ Tarefa criada com sucesso:', result.data);
+                    
+                    toast({
+                      title: "✅ Tarefa criada",
+                      description: `"${action.data.title}" foi adicionada pelo assistente.`,
+                    });
+                  } else {
+                    console.error('❌ Erro ao criar tarefa:', result?.error || 'Erro desconhecido');
+                    toast({
+                      title: "❌ Erro ao criar tarefa",
+                      description: result?.error || "Não foi possível criar a tarefa. Tente novamente.",
+                      variant: "destructive"
+                    });
+                  }
                 } catch (error) {
-                  console.error('❌ Erro ao criar tarefa:', error);
+                  console.error('❌ Exceção ao criar tarefa:', error);
                   toast({
                     title: "❌ Erro ao criar tarefa",
                     description: "Não foi possível criar a tarefa. Tente novamente.",

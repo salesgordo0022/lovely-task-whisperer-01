@@ -123,15 +123,20 @@ export class SupabaseDataService {
 
   async createTask(taskData: CreateTaskDTO): Promise<ApiResponse<Task>> {
     try {
+      console.log('🔵 createTask called with data:', JSON.stringify(taskData, null, 2));
+      
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
+        console.error('❌ No user authenticated');
         return {
           data: {} as Task,
           success: false,
           error: 'Usuário não autenticado'
         };
       }
+
+      console.log('✅ User authenticated:', user.id);
 
       const insertData = {
         title: taskData.title,
@@ -151,6 +156,8 @@ export class SupabaseDataService {
         reminder_minutes: taskData.reminder_minutes
       };
 
+      console.log('📤 Sending to Supabase:', JSON.stringify(insertData, null, 2));
+
       const { data, error } = await supabase
         .from('tasks')
         .insert(insertData)
@@ -158,12 +165,20 @@ export class SupabaseDataService {
         .single();
 
       if (error) {
+        console.error('❌ Supabase error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         return {
           data: {} as Task,
           success: false,
-          error: error.message
+          error: `${error.message} - Code: ${error.code}`
         };
       }
+
+      console.log('✅ Task created successfully:', data.id);
 
       // Create checklist items if provided
       let checklistItems: TaskChecklistItem[] = [];
