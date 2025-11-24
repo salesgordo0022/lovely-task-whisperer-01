@@ -149,11 +149,17 @@ export class SupabaseDataService {
         start_date: taskData.start_date?.toISOString(),
         due_date: taskData.due_date?.toISOString(),
         estimated_time: taskData.estimated_time,
+        subcategory_id: taskData.subcategory_id,
         meeting_url: taskData.meeting_url,
         location: taskData.location,
         attendees: taskData.attendees,
         meeting_notes: taskData.meeting_notes,
-        reminder_minutes: taskData.reminder_minutes
+        reminder_minutes: taskData.reminder_minutes,
+        institution: taskData.institution,
+        course: taskData.course,
+        subject: taskData.subject,
+        semester: taskData.semester,
+        professor: taskData.professor
       };
 
       console.log('📤 Sending to Supabase:', JSON.stringify(insertData, null, 2));

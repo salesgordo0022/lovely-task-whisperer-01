@@ -142,6 +142,36 @@ export type Database = {
           },
         ]
       }
+      task_subcategories: {
+        Row: {
+          category: string
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           actual_time: number | null
@@ -166,6 +196,7 @@ export type Database = {
           reminder_minutes: number | null
           semester: string | null
           start_date: string | null
+          subcategory_id: string | null
           subject: string | null
           title: string
           updated_at: string | null
@@ -194,6 +225,7 @@ export type Database = {
           reminder_minutes?: number | null
           semester?: string | null
           start_date?: string | null
+          subcategory_id?: string | null
           subject?: string | null
           title: string
           updated_at?: string | null
@@ -222,12 +254,21 @@ export type Database = {
           reminder_minutes?: number | null
           semester?: string | null
           start_date?: string | null
+          subcategory_id?: string | null
           subject?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "task_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_email_settings: {
         Row: {

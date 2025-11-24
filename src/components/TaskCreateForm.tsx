@@ -24,6 +24,7 @@ export function TaskCreateForm({ onSubmit }: TaskCreateFormProps) {
   const [isUrgent, setIsUrgent] = useState(false);
   const [isImportant, setIsImportant] = useState(false);
   const [checklistItems, setChecklistItems] = useState<Omit<TaskChecklistItem, 'id' | 'created_at' | 'updated_at' | 'task_id' | 'order_index'>[]>([]);
+  const [subcategoryId, setSubcategoryId] = useState<string>();
 
   // Campos específicos para reuniões/compromissos
   const [meetingUrl, setMeetingUrl] = useState<string>();
@@ -90,6 +91,7 @@ export function TaskCreateForm({ onSubmit }: TaskCreateFormProps) {
       due_date: finalDueDate,
       estimated_time: estimatedTime,
       checklist,
+      subcategory_id: subcategoryId,
       // Campos específicos para reuniões
       meeting_url: category === 'agenda' ? meetingUrl : undefined,
       location: category === 'agenda' ? location : undefined,
@@ -116,6 +118,7 @@ export function TaskCreateForm({ onSubmit }: TaskCreateFormProps) {
     setIsUrgent(false);
     setIsImportant(false);
     setChecklistItems([]);
+    setSubcategoryId(undefined);
     // Reset campos de reunião
     setMeetingUrl(undefined);
     setLocation(undefined);
@@ -147,6 +150,8 @@ export function TaskCreateForm({ onSubmit }: TaskCreateFormProps) {
           setCategory={setCategory}
           priority={priority}
           setPriority={setPriority}
+          subcategoryId={subcategoryId}
+          setSubcategoryId={setSubcategoryId}
         />
 
         {/* Mostrar campos específicos baseados na categoria */}

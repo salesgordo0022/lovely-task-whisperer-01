@@ -27,6 +27,7 @@ export interface Task extends SyncableEntity {
   completed_at?: Date;
   user_id?: string; // Para multi-usuário
   checklist: TaskChecklistItem[];
+  subcategory_id?: string; // Subcategoria personalizada
   
   // Campos específicos para compromissos/reuniões (categoria agenda)
   meeting_url?: string; // Link para reunião online
@@ -81,6 +82,7 @@ export interface CreateTaskDTO {
   estimated_time?: number;
   user_id?: string;
   checklist?: TaskChecklistItem[];
+  subcategory_id?: string;
   
   // Campos específicos para compromissos/reuniões
   meeting_url?: string;
@@ -110,6 +112,7 @@ export interface UpdateTaskDTO {
   estimated_time?: number;
   actual_time?: number;
   checklist?: TaskChecklistItem[];
+  subcategory_id?: string;
   
   // Campos específicos para compromissos/reuniões
   meeting_url?: string;

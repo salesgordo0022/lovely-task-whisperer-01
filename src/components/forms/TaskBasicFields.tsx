@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TaskCategory, TaskPriority } from '@/types/task';
+import { useSubcategories } from '@/hooks/useSubcategories';
 
 interface TaskBasicFieldsProps {
   title: string;
@@ -14,6 +15,8 @@ interface TaskBasicFieldsProps {
   setCategory: (category: TaskCategory) => void;
   priority: TaskPriority;
   setPriority: (priority: TaskPriority) => void;
+  subcategoryId?: string;
+  setSubcategoryId: (id: string | undefined) => void;
 }
 
 export function TaskBasicFields({
@@ -25,7 +28,12 @@ export function TaskBasicFields({
   setCategory,
   priority,
   setPriority,
+  subcategoryId,
+  setSubcategoryId,
 }: TaskBasicFieldsProps) {
+  const { getSubcategoriesByCategory } = useSubcategories();
+  const subcategories = getSubcategoriesByCategory(category);
+  
   const categories: { value: TaskCategory; label: string }[] = [
     { value: 'personal', label: '🏠 Pessoal' },
     { value: 'work', label: '💼 Trabalho' },
@@ -71,7 +79,10 @@ export function TaskBasicFields({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Categoria</Label>
-          <Select value={category} onValueChange={(value) => setCategory(value as TaskCategory)}>
+          <Select value={category} onValueChange={(value) => {
+            setCategory(value as TaskCategory);
+            setSubcategoryId(undefined); // Reset subcategory when category changes
+          }}>
             <SelectTrigger className="h-9">
               <SelectValue />
             </SelectTrigger>
@@ -101,6 +112,26 @@ export function TaskBasicFields({
           </Select>
         </div>
       </div>
+
+      {/* Subcategory - shown only if there are subcategories for this category */}
+      {subcategories.length > 0 && (
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">Subcategoria (opcional)</Label>
+          <Select value={subcategoryId || "none"} onValueChange={(value) => setSubcategoryId(value === "none" ? undefined : value)}>
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Selecione uma subcategoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sem subcategoria</SelectItem>
+              {subcategories.map((sub) => (
+                <SelectItem key={sub.id} value={sub.id}>
+                  {sub.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
     </div>
   );
 }
