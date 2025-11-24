@@ -298,7 +298,7 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
 
             {/* Footer */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge 
                   variant="secondary" 
                   className={cn('text-xs', `category-${task.category}`)}
@@ -306,6 +306,20 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
                   <CategoryIcon className="w-3 h-3 mr-1" />
                   {getCategoryLabel(task.category)}
                 </Badge>
+                
+                {task.subcategory && (
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs"
+                    style={task.subcategory.color ? { 
+                      borderColor: task.subcategory.color,
+                      color: task.subcategory.color,
+                      backgroundColor: `${task.subcategory.color}10`
+                    } : undefined}
+                  >
+                    {task.subcategory.name}
+                  </Badge>
+                )}
                 
                 <Badge 
                   variant="outline" 

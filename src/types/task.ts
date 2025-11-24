@@ -1,5 +1,6 @@
 
 import { SyncableEntity, QueryFilters } from './database';
+import { TaskSubcategory } from './subcategory';
 
 export type TaskCategory = 'personal' | 'work' | 'agenda' | 'studies';
 
@@ -28,6 +29,7 @@ export interface Task extends SyncableEntity {
   user_id?: string; // Para multi-usuário
   checklist: TaskChecklistItem[];
   subcategory_id?: string; // Subcategoria personalizada
+  subcategory?: TaskSubcategory; // Dados da subcategoria
   
   // Campos específicos para compromissos/reuniões (categoria agenda)
   meeting_url?: string; // Link para reunião online
