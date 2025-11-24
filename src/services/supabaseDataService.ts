@@ -11,7 +11,13 @@ export class SupabaseDataService {
         .from('tasks')
         .select(`
           *,
-          task_checklist_items (*)
+          task_checklist_items (*),
+          task_subcategories (
+            id,
+            name,
+            color,
+            category
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -51,6 +57,15 @@ export class SupabaseDataService {
         completed_at: task.completed_at ? new Date(task.completed_at) : undefined,
         created_at: new Date(task.created_at),
         updated_at: new Date(task.updated_at),
+        subcategory: task.task_subcategories ? {
+          id: task.task_subcategories.id,
+          name: task.task_subcategories.name,
+          color: task.task_subcategories.color,
+          category: task.task_subcategories.category as TaskCategory,
+          user_id: task.user_id,
+          created_at: new Date(),
+          updated_at: new Date()
+        } : undefined,
         checklist: (task.task_checklist_items || []).map((item: any) => ({
           ...item,
           created_at: new Date(item.created_at),
@@ -77,7 +92,13 @@ export class SupabaseDataService {
         .from('tasks')
         .select(`
           *,
-          task_checklist_items (*)
+          task_checklist_items (*),
+          task_subcategories (
+            id,
+            name,
+            color,
+            category
+          )
         `)
         .eq('id', id)
         .single();
@@ -101,6 +122,15 @@ export class SupabaseDataService {
         completed_at: data.completed_at ? new Date(data.completed_at) : undefined,
         created_at: new Date(data.created_at),
         updated_at: new Date(data.updated_at),
+        subcategory: data.task_subcategories ? {
+          id: data.task_subcategories.id,
+          name: data.task_subcategories.name,
+          color: data.task_subcategories.color,
+          category: data.task_subcategories.category as TaskCategory,
+          user_id: data.user_id,
+          created_at: new Date(),
+          updated_at: new Date()
+        } : undefined,
         checklist: (data.task_checklist_items || []).map((item: any) => ({
           ...item,
           created_at: new Date(item.created_at),
@@ -292,7 +322,13 @@ export class SupabaseDataService {
         .eq('id', id)
         .select(`
           *,
-          task_checklist_items (*)
+          task_checklist_items (*),
+          task_subcategories (
+            id,
+            name,
+            color,
+            category
+          )
         `)
         .maybeSingle();
 
@@ -323,6 +359,15 @@ export class SupabaseDataService {
         completed_at: data.completed_at ? new Date(data.completed_at) : undefined,
         created_at: new Date(data.created_at),
         updated_at: new Date(data.updated_at),
+        subcategory: data.task_subcategories ? {
+          id: data.task_subcategories.id,
+          name: data.task_subcategories.name,
+          color: data.task_subcategories.color,
+          category: data.task_subcategories.category as TaskCategory,
+          user_id: data.user_id,
+          created_at: new Date(),
+          updated_at: new Date()
+        } : undefined,
         checklist: (data.task_checklist_items || []).map((item: any) => ({
           ...item,
           created_at: new Date(item.created_at),
