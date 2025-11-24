@@ -9,9 +9,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { CategoryToggleControls } from './CategoryToggleControls';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SubcategoryManager } from './SubcategoryManager';
 
 export function CategorySettingsModal() {
   const [isOpen, setIsOpen] = useState(false);
+
+  const categories = [
+    { key: 'personal', label: 'Pessoal' },
+    { key: 'work', label: 'Trabalho' },
+    { key: 'agenda', label: 'Agenda' },
+    { key: 'studies', label: 'Estudos' }
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -25,11 +34,31 @@ export function CategorySettingsModal() {
           <span className="hidden sm:inline">Configurar Categorias</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Configurações das Categorias</DialogTitle>
         </DialogHeader>
-        <CategoryToggleControls />
+        
+        <Tabs defaultValue="toggle" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="toggle">Ativar/Desativar</TabsTrigger>
+            <TabsTrigger value="subcategories">Subcategorias</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="toggle" className="mt-4">
+            <CategoryToggleControls />
+          </TabsContent>
+          
+          <TabsContent value="subcategories" className="mt-4 space-y-4">
+            {categories.map(cat => (
+              <SubcategoryManager 
+                key={cat.key} 
+                category={cat.key as any}
+                categoryLabel={cat.label}
+              />
+            ))}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
