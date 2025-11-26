@@ -1,5 +1,6 @@
 import { Task } from '@/types/task';
 import { TaskItem } from './TaskItem';
+import { useMemo } from 'react';
 
 interface TaskListProps {
   tasks: Task[];
@@ -10,6 +11,35 @@ interface TaskListProps {
 }
 
 export function TaskList({ tasks, onToggleTask, onUpdateTask, onDeleteTask, onUpdateChecklistItem }: TaskListProps) {
+  // Agrupar tarefas por subcategoria
+  const tasksBySubcategory = useMemo(() => {
+    const groups: { subcategory: string | null; name: string; color?: string; tasks: Task[] }[] = [];
+    const withoutSubcategory: Task[] = [];
+    
+    tasks.forEach(task => {
+      if (task.subcategory_id && task.subcategory) {
+        const existingGroup = groups.find(g => g.subcategory === task.subcategory_id);
+        if (existingGroup) {
+          existingGroup.tasks.push(task);
+        } else {
+          groups.push({
+            subcategory: task.subcategory_id,
+            name: task.subcategory.name,
+            color: task.subcategory.color,
+            tasks: [task]
+          });
+        }
+      } else {
+        withoutSubcategory.push(task);
+      }
+    });
+    
+    // Ordenar grupos por nome
+    groups.sort((a, b) => a.name.localeCompare(b.name));
+    
+    return { groups, withoutSubcategory };
+  }, [tasks]);
+
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12">
@@ -32,20 +62,61 @@ export function TaskList({ tasks, onToggleTask, onUpdateTask, onDeleteTask, onUp
   }
 
   return (
-    <div className="space-y-3">
-      {tasks.map((task, index) => (
-        <div
-          key={task.id}
-          className="task-enter"
-          style={{ animationDelay: `${index * 50}ms` }}
-        >
-          <TaskItem
-            task={task}
-            onToggle={() => onToggleTask(task.id)}
-            onUpdate={(updates) => onUpdateTask(task.id, updates)}
-            onDelete={() => onDeleteTask(task.id)}
-            onUpdateChecklistItem={onUpdateChecklistItem}
-          />
+    <div className="space-y-6">
+      {/* Tarefas sem subcategoria */}
+      {tasksBySubcategory.withoutSubcategory.length > 0 && (
+        <div className="space-y-3">
+          {tasksBySubcategory.withoutSubcategory.map((task, index) => (
+            <div
+              key={task.id}
+              className="task-enter"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <TaskItem
+                task={task}
+                onToggle={() => onToggleTask(task.id)}
+                onUpdate={(updates) => onUpdateTask(task.id, updates)}
+                onDelete={() => onDeleteTask(task.id)}
+                onUpdateChecklistItem={onUpdateChecklistItem}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tarefas agrupadas por subcategoria */}
+      {tasksBySubcategory.groups.map((group) => (
+        <div key={group.subcategory} className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <div 
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: group.color || 'hsl(var(--muted))' }}
+            />
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+              {group.name}
+            </h3>
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">
+              {group.tasks.length} {group.tasks.length === 1 ? 'tarefa' : 'tarefas'}
+            </span>
+          </div>
+          <div className="space-y-3">
+            {group.tasks.map((task, index) => (
+              <div
+                key={task.id}
+                className="task-enter"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <TaskItem
+                  task={task}
+                  onToggle={() => onToggleTask(task.id)}
+                  onUpdate={(updates) => onUpdateTask(task.id, updates)}
+                  onDelete={() => onDeleteTask(task.id)}
+                  onUpdateChecklistItem={onUpdateChecklistItem}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
