@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useSubcategories } from '@/hooks/useSubcategories';
 
 interface TaskFiltersProps {
   filters: TaskFiltersType;
@@ -18,6 +19,7 @@ interface TaskFiltersProps {
 
 export function TaskFilters({ filters, onFiltersChange }: TaskFiltersProps) {
   const [searchInput, setSearchInput] = useState(filters.search || '');
+  const { subcategories } = useSubcategories();
 
   const handleSearchChange = (value: string) => {
     setSearchInput(value);
@@ -152,6 +154,36 @@ export function TaskFilters({ filters, onFiltersChange }: TaskFiltersProps) {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Subcategory Filter */}
+          {filters.category && subcategories.filter(s => s.category === filters.category).length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Subcategoria</label>
+              <Select
+                value={filters.subcategory_id || ''}
+                onValueChange={(value) =>
+                  onFiltersChange({
+                    ...filters,
+                    subcategory_id: value || undefined,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas as subcategorias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todas as subcategorias</SelectItem>
+                  {subcategories
+                    .filter(s => s.category === filters.category)
+                    .map((subcategory) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </PopoverContent>
       </Popover>
 

@@ -263,6 +263,7 @@ export function useOptimizedTasks() {
       if (filters.completed !== undefined && task.completed !== filters.completed) return false;
       if (filters.category && task.category !== filters.category) return false;
       if (filters.priority && task.priority !== filters.priority) return false;
+      if (filters.subcategory_id && task.subcategory_id !== filters.subcategory_id) return false;
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         return (

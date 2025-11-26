@@ -55,6 +55,7 @@ export interface TaskFilters extends QueryFilters {
   today?: boolean;
   overdue?: boolean;
   user_id?: string;
+  subcategory_id?: string;
   date_range?: {
     start: Date;
     end: Date;
