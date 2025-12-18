@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Task, CreateTaskDTO, UpdateTaskDTO, TaskFilters, ProductivityStats, TaskCategory, TaskPriority, TaskChecklistItem } from '@/types/task';
 import { ApiResponse } from '@/types/database';
 import { GameStats, Achievement } from '@/hooks/useGameification';
+import { logger } from '@/utils/logger';
 
 export class SupabaseDataService {
   async getTasks(filters?: TaskFilters): Promise<ApiResponse<Task[]>> {
@@ -153,12 +154,12 @@ export class SupabaseDataService {
 
   async createTask(taskData: CreateTaskDTO): Promise<ApiResponse<Task>> {
     try {
-      console.log('🔵 createTask called with data:', JSON.stringify(taskData, null, 2));
+      logger.debug('createTask called', { title: taskData.title, category: taskData.category });
       
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        console.error('❌ No user authenticated');
+        logger.warn('createTask: No user authenticated');
         return {
           data: {} as Task,
           success: false,
@@ -166,7 +167,7 @@ export class SupabaseDataService {
         };
       }
 
-      console.log('✅ User authenticated:', user.id);
+      logger.debug('User authenticated for task creation');
 
       const insertData = {
         title: taskData.title,
@@ -192,7 +193,7 @@ export class SupabaseDataService {
         professor: taskData.professor
       };
 
-      console.log('📤 Sending to Supabase:', JSON.stringify(insertData, null, 2));
+      logger.debug('Sending task to database');
 
       const { data, error } = await supabase
         .from('tasks')
@@ -201,12 +202,7 @@ export class SupabaseDataService {
         .single();
 
       if (error) {
-        console.error('❌ Supabase error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
+        logger.error('Supabase error creating task', { code: error.code });
         return {
           data: {} as Task,
           success: false,
@@ -214,7 +210,7 @@ export class SupabaseDataService {
         };
       }
 
-      console.log('✅ Task created successfully:', data.id);
+      logger.info('Task created successfully');
 
       // Create checklist items if provided
       let checklistItems: TaskChecklistItem[] = [];

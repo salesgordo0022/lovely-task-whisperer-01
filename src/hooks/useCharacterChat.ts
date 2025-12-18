@@ -5,7 +5,7 @@ import { Task, ProductivityStats } from '@/types/task';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast } from './use-toast';
 import { useTasks } from './useTasks';
-
+import { logger } from '@/utils/logger';
 
 export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userName?: string) {
   // Obter personagem selecionado das configurações
@@ -79,26 +79,24 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
         dataActions
       );
 
-      console.log('🤖 AI Response received:', { 
+      logger.debug('AI Response received', { 
         hasResponse: !!result.response, 
-        hasActions: !!result.actions,
         actionsCount: result.actions?.length || 0
       });
 
       // Executar ações se houver
       if (result.actions && result.actions.length > 0) {
-        console.log('🎯 Processing', result.actions.length, 'actions from AI');
+        logger.debug('Processing actions from AI', { count: result.actions.length });
         for (const action of result.actions) {
           try {
             switch (action.type) {
               case 'CREATE_TASK':
-                // Log para debug
-                console.log('📝 Dados da tarefa recebidos da AI:', action.data);
+                logger.debug('Processing CREATE_TASK action');
                 
                 try {
                   // Validar campos obrigatórios
                   if (!action.data.title || !action.data.category || !action.data.priority) {
-                    console.error('❌ Dados inválidos:', { 
+                    logger.warn('Invalid task data from AI', { 
                       hasTitle: !!action.data.title,
                       hasCategory: !!action.data.category,
                       hasPriority: !!action.data.priority
@@ -115,14 +113,14 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
                   const result = await taskManager.addTask(action.data);
                   
                   if (result?.success) {
-                    console.log('✅ Tarefa criada com sucesso via IA:', result.data);
+                    logger.info('Task created via AI successfully');
                     
                     toast({
                       title: "✅ Tarefa criada",
                       description: `"${action.data.title}" foi adicionada com sucesso!`,
                     });
                   } else {
-                    console.error('❌ Erro ao criar tarefa:', result?.error || 'Erro desconhecido');
+                    logger.error('Error creating task via AI', { error: result?.error });
                     toast({
                       title: "❌ Erro ao criar tarefa",
                       description: result?.error || "Não foi possível criar a tarefa. Tente novamente.",
@@ -130,7 +128,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
                     });
                   }
                 } catch (error) {
-                  console.error('❌ Exceção ao criar tarefa:', error);
+                  logger.error('Exception creating task via AI', error);
                   toast({
                     title: "❌ Erro ao criar tarefa",
                     description: error instanceof Error ? error.message : "Erro desconhecido ao criar tarefa.",
@@ -176,7 +174,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
                 break;
             }
           } catch (error) {
-            console.error('Erro ao executar ação:', error);
+            logger.error('Error executing AI action', error);
             toast({
               title: "Erro",
               description: "Não foi possível executar a ação solicitada.",
@@ -198,7 +196,7 @@ export function useCharacterChat(tasks: Task[], stats: ProductivityStats, userNa
       // Add AI response to chat history
       setChatHistory(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Erro no chat:', error);
+      logger.error('Chat error', error);
       
       // Resposta de fallback
       const fallbackMessage: ChatMessage = {

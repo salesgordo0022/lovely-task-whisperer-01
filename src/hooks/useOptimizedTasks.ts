@@ -5,6 +5,7 @@ import { useToast } from './use-toast';
 import { useGameification } from './useGameification';
 import { useAuth } from './useAuth';
 import { useRealTimeUpdates } from './useRealTimeUpdates';
+import { logger } from '@/utils/logger';
 
 // Cache para otimização
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
@@ -119,11 +120,11 @@ export function useOptimizedTasks() {
   // Adicionar tarefa - sem optimistic update para evitar conflitos
   const addTask = useCallback(async (taskData: CreateTaskDTO) => {
     if (!user) {
-      console.error('❌ addTask: No user authenticated');
+      logger.warn('addTask: No user authenticated');
       return { success: false, error: 'Usuário não autenticado' };
     }
 
-    console.log('🔵 addTask called with:', JSON.stringify(taskData, null, 2));
+    logger.debug('addTask called', { title: taskData.title });
 
     setIsLoading(true);
 
@@ -131,7 +132,7 @@ export function useOptimizedTasks() {
       const result = await supabaseDataService.createTask(taskData);
       
       if (result.success) {
-        console.log('✅ addTask: Task created successfully:', result.data.id);
+        logger.info('Task created successfully');
         
         // Força recarregamento das tarefas para garantir sincronia
         await loadTasks(true);
@@ -146,7 +147,7 @@ export function useOptimizedTasks() {
         throw new Error(result.error);
       }
     } catch (error) {
-      console.error('❌ addTask error:', error);
+      logger.error('addTask error', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Erro ao criar tarefa';
       toast({
@@ -382,13 +383,11 @@ export function useOptimizedTasks() {
 
   // Atualizar item do checklist - funcionalidade corrigida
   const updateChecklistItem = useCallback(async (taskId: string, itemIndex: number, completed: boolean) => {
-    // Update checklist item
-    
     try {
       // Find the task in current state
       const task = tasks.find(t => t.id === taskId);
       if (!task || !task.checklist || itemIndex >= task.checklist.length) {
-        console.error('Tarefa ou item do checklist não encontrado');
+        logger.warn('Checklist item not found', { taskId, itemIndex });
         return;
       }
 
@@ -396,7 +395,7 @@ export function useOptimizedTasks() {
       const result = await supabaseDataService.updateChecklistItem(taskId, itemIndex, completed);
       
       if (!result.success) {
-        console.error('Erro ao atualizar checklist:', result.error);
+        logger.error('Error updating checklist', { error: result.error });
         toast({
           title: 'Erro',
           description: result.error || 'Erro ao atualizar checklist',
@@ -416,13 +415,13 @@ export function useOptimizedTasks() {
         return [...newTasks]; // Force new array reference
       });
       
-      // Checklist updated successfully
+      logger.debug('Checklist item updated successfully');
       
       // Force cache refresh
       setLastSyncTime(new Date());
       
     } catch (error) {
-      console.error('Erro inesperado ao atualizar checklist:', error);
+      logger.error('Unexpected error updating checklist', error);
       toast({
         title: 'Erro',
         description: 'Erro inesperado ao atualizar checklist',
