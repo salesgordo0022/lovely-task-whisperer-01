@@ -79,7 +79,7 @@ export function QuickActions({
   return (
     <div className="responsive-gap flex flex-col">
       {/* Categorias */}
-      <div className="flex flex-wrap gap-2 sm:gap-3">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0 sm:flex-wrap">
         {categories.map((category) => (
           <Button
             key={category.key}
@@ -95,31 +95,31 @@ export function QuickActions({
               }
             }}
             className={cn(
-              'macos-button transition-all duration-200 flex-1 sm:flex-none min-w-[80px]',
+              'macos-button transition-all duration-200 flex-shrink-0 h-9 px-2.5 sm:px-3 sm:flex-initial sm:min-w-[80px]',
               activeCategory === category.key && 'shadow-soft'
             )}
           >
-            <category.icon className="w-4 h-4 mr-2" />
-            <span className="text-sm sm:text-base">{category.label}</span>
+            <category.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+            <span className="text-xs sm:text-sm whitespace-nowrap">{category.label}</span>
           </Button>
         ))}
       </div>
 
       {/* Busca e filtros rápidos */}
-      <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:items-center">
         {/* Busca */}
-        <div className="relative w-full lg:w-80">
+        <div className="relative w-full sm:w-64 lg:w-80">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder="Buscar tarefas..."
             value={searchInput}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10 h-11 sm:h-10 text-base sm:text-sm"
+            className="pl-10 h-10 text-sm"
           />
         </div>
 
         {/* Filtros rápidos */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           {quickFilters.map((filter) => (
             <Button
               key={filter.key}
@@ -127,12 +127,12 @@ export function QuickActions({
               size="sm"
               onClick={filter.action}
               className={cn(
-                'macos-button transition-all duration-200 text-xs sm:text-sm',
+                'macos-button transition-all duration-200 text-xs flex-shrink-0 h-9 px-2.5',
                 filter.active && 'shadow-soft'
               )}
             >
               <filter.icon className="w-3 h-3 mr-1" />
-              {filter.label}
+              <span className="whitespace-nowrap">{filter.label}</span>
             </Button>
           ))}
         </div>
@@ -143,9 +143,9 @@ export function QuickActions({
             variant="ghost"
             size="sm"
             onClick={clearAllFilters}
-            className="text-muted-foreground hover:text-foreground transition-all duration-200 text-xs sm:text-sm macos-button"
+            className="text-muted-foreground hover:text-foreground transition-all duration-200 text-xs macos-button h-9 px-2.5 flex-shrink-0"
           >
-            Limpar tudo
+            Limpar
           </Button>
         )}
       </div>

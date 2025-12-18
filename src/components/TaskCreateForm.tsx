@@ -139,8 +139,8 @@ export function TaskCreateForm({ onSubmit }: TaskCreateFormProps) {
   const isStudiesCategory = category === 'studies';
 
   return (
-    <div className="max-h-[calc(100vh-8rem)] overflow-y-auto">
-      <form onSubmit={handleSubmit} className="space-y-4 p-1">
+    <div className="max-h-[calc(100vh-10rem)] sm:max-h-[calc(100vh-8rem)] overflow-y-auto -mx-1 px-1">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 pb-2">
         <TaskBasicFields
           title={title}
           setTitle={setTitle}
@@ -229,7 +229,7 @@ export function TaskCreateForm({ onSubmit }: TaskCreateFormProps) {
         )}
 
         {/* Submit */}
-        <div className="flex justify-end pt-2 sticky bottom-0 bg-background border-t">
+        <div className="flex justify-end pt-3 sm:pt-4 sticky bottom-0 bg-background/95 backdrop-blur-sm border-t -mx-1 px-1 py-3">
           <Button
             type="submit"
             disabled={
@@ -237,7 +237,7 @@ export function TaskCreateForm({ onSubmit }: TaskCreateFormProps) {
               (isAgendaCategory && !startDate) ||
               (isStudiesCategory && !institution && !course)
             }
-            className="button-press min-w-[120px]"
+            className="button-press w-full sm:w-auto sm:min-w-[140px] h-11 sm:h-10 text-sm font-medium"
           >
             {isAgendaCategory ? 'Criar Compromisso' : 
              isStudiesCategory ? 'Criar Tarefa de Estudo' : 'Criar Tarefa'}

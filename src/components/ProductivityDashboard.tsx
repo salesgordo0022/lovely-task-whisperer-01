@@ -64,7 +64,7 @@ export function ProductivityDashboard({ stats, tasksByCategory }: ProductivityDa
             
             <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2">
               <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
+                <div className="flex items-center justify-center gap-1 text-success mb-1">
                   <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="font-bold text-base sm:text-lg">{stats.tasksCompleted}</span>
                 </div>
@@ -72,7 +72,7 @@ export function ProductivityDashboard({ stats, tasksByCategory }: ProductivityDa
               </div>
               
               <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-orange-600 mb-1">
+                <div className="flex items-center justify-center gap-1 text-warning mb-1">
                   <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="font-bold text-base sm:text-lg">{stats.totalTasks - stats.tasksCompleted}</span>
                 </div>
