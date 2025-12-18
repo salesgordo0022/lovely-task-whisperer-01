@@ -128,9 +128,9 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
 
   const getPriorityColor = (priority: TaskPriority) => {
     switch (priority) {
-      case 'urgent': return 'text-red-600 bg-red-50';
-      case 'important': return 'text-yellow-600 bg-yellow-50';
-      case 'normal': return 'text-green-600 bg-green-50';
+      case 'urgent': return 'text-destructive bg-destructive/10 dark:bg-destructive/20';
+      case 'important': return 'text-warning-foreground bg-warning/20 dark:text-warning dark:bg-warning/30';
+      case 'normal': return 'text-success-foreground bg-success/20 dark:text-success dark:bg-success/30';
     }
   };
 
@@ -150,9 +150,9 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
       <Card className={cn(
         'transition-all duration-300 relative macos-card-subtle',
         task.completed && 'opacity-75',
-        isOverdue && 'border-red-200 bg-red-50/50',
-        isCompleting && 'bg-green-50 macos-spring',
-        showCelebration && 'bg-green-100 macos-bounce'
+        isOverdue && 'border-destructive/30 bg-destructive/5 dark:bg-destructive/10',
+        isCompleting && 'bg-success/10 dark:bg-success/20 macos-spring',
+        showCelebration && 'bg-success/20 dark:bg-success/30 macos-bounce'
       )}>
         <CardContent className="p-4">
           {/* Celebration overlay */}
@@ -359,15 +359,15 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
                 </div>
                 
                 <div className="space-y-2">
-                  {task.checklist.map((item, index) => (
-                    <div 
-                      key={item.id || index} 
-                      className={cn(
-                        "flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 group hover:shadow-sm",
-                        item.completed 
-                          ? "bg-green-50 border-green-200 hover:bg-green-100" 
-                          : "bg-background hover:bg-muted/50 hover:border-primary/30"
-                      )}
+                    {task.checklist.map((item, index) => (
+                      <div 
+                        key={item.id || index} 
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 group hover:shadow-sm",
+                          item.completed 
+                            ? "bg-success/10 border-success/30 hover:bg-success/20 dark:bg-success/20 dark:border-success/40" 
+                            : "bg-background hover:bg-muted/50 hover:border-primary/30"
+                        )}
                     >
                       <div className="flex-shrink-0 w-6 h-6 bg-muted/60 rounded-full flex items-center justify-center text-xs font-medium text-muted-foreground group-hover:bg-primary/10 transition-colors">
                         {index + 1}
@@ -385,7 +385,7 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
                       <span className={cn(
                         'flex-1 text-sm transition-all duration-200 select-none',
                         item.completed 
-                          ? 'line-through text-green-700/70 font-medium' 
+                          ? 'line-through text-success font-medium' 
                           : 'text-foreground group-hover:text-primary'
                       )}>
                         {item.title}
@@ -393,7 +393,7 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
                       
                       {item.completed && (
                         <div className="flex-shrink-0">
-                          <Check className="w-4 h-4 text-green-600 animate-in fade-in duration-200" />
+                          <Check className="w-4 h-4 text-success animate-in fade-in duration-200" />
                         </div>
                       )}
                     </div>
@@ -401,8 +401,8 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete, onGameEvent, onUp
                 </div>
 
                 {task.checklist.every(item => item.completed) && task.checklist.length > 0 && !task.completed && (
-                  <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded text-center">
-                    <p className="text-sm text-green-700 font-medium">
+                  <div className="mt-3 p-2 bg-success/10 border border-success/30 rounded text-center dark:bg-success/20">
+                    <p className="text-sm text-success font-medium">
                       ✅ Todos os itens concluídos! A tarefa será finalizada automaticamente.
                     </p>
                   </div>

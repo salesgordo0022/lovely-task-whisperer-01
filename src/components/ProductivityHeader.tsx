@@ -168,7 +168,7 @@ export function ProductivityHeader({
           </div>
 
           {/* Menu Mobile - Scroll horizontal de ícones */}
-          <div className="flex md:hidden items-center gap-1 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex md:hidden items-center gap-1 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
             <div className="flex items-center space-x-1 min-w-max">
               {viewButtons.map(({ mode, icon: Icon, mobileLabel }) => (
                 <Button 
@@ -177,12 +177,12 @@ export function ProductivityHeader({
                   size="sm" 
                   onClick={() => onViewModeChange(mode)} 
                   className={cn(
-                    'transition-all duration-200 text-xs px-2 py-2 min-w-[60px] whitespace-nowrap flex-shrink-0',
+                    'transition-all duration-200 text-xs px-2.5 py-2 min-w-[56px] whitespace-nowrap flex-shrink-0 h-9',
                     viewMode === mode && 'shadow-soft bg-primary text-primary-foreground'
                   )}
                 >
-                  <Icon className="w-4 h-4 mr-1" />
-                  {mobileLabel}
+                  <Icon className="w-3.5 h-3.5 mr-1" />
+                  <span className="text-[11px]">{mobileLabel}</span>
                 </Button>
               ))}
             </div>
