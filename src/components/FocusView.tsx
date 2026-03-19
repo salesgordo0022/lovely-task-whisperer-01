@@ -68,7 +68,7 @@ export function FocusView({ tasks, onToggleTask, onUpdateTask, onDeleteTask }: F
 
   // Timer do Pomodoro
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (pomodoroState.isRunning && pomodoroState.timeLeft > 0) {
       interval = setInterval(() => {

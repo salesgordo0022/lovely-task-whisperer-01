@@ -14,7 +14,292 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notes: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      productivity_stats: {
+        Row: {
+          calculated_at: string
+          focus_time: number
+          id: string
+          productivity_score: number
+          streak: number
+          tasks_completed: number
+          total_tasks: number
+          user_id: string
+        }
+        Insert: {
+          calculated_at?: string
+          focus_time?: number
+          id?: string
+          productivity_score?: number
+          streak?: number
+          tasks_completed?: number
+          total_tasks?: number
+          user_id: string
+        }
+        Update: {
+          calculated_at?: string
+          focus_time?: number
+          id?: string
+          productivity_score?: number
+          streak?: number
+          tasks_completed?: number
+          total_tasks?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      task_checklist_items: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          order_index: number
+          task_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          order_index?: number
+          task_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          order_index?: number
+          task_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_checklist_items_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_subcategories: {
+        Row: {
+          category: string
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          actual_time: number | null
+          attendees: string[] | null
+          category: string
+          completed: boolean
+          completed_at: string | null
+          course: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          estimated_time: number | null
+          id: string
+          institution: string | null
+          is_important: boolean
+          is_urgent: boolean
+          location: string | null
+          meeting_notes: string | null
+          meeting_url: string | null
+          priority: string
+          professor: string | null
+          reminder_minutes: number | null
+          semester: string | null
+          start_date: string | null
+          subcategory_id: string | null
+          subject: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_time?: number | null
+          attendees?: string[] | null
+          category?: string
+          completed?: boolean
+          completed_at?: string | null
+          course?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          estimated_time?: number | null
+          id?: string
+          institution?: string | null
+          is_important?: boolean
+          is_urgent?: boolean
+          location?: string | null
+          meeting_notes?: string | null
+          meeting_url?: string | null
+          priority?: string
+          professor?: string | null
+          reminder_minutes?: number | null
+          semester?: string | null
+          start_date?: string | null
+          subcategory_id?: string | null
+          subject?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_time?: number | null
+          attendees?: string[] | null
+          category?: string
+          completed?: boolean
+          completed_at?: string | null
+          course?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          estimated_time?: number | null
+          id?: string
+          institution?: string | null
+          is_important?: boolean
+          is_urgent?: boolean
+          location?: string | null
+          meeting_notes?: string | null
+          meeting_url?: string | null
+          priority?: string
+          professor?: string | null
+          reminder_minutes?: number | null
+          semester?: string | null
+          start_date?: string | null
+          subcategory_id?: string | null
+          subject?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "task_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_game_stats: {
+        Row: {
+          achievements: Json | null
+          created_at: string
+          id: string
+          level: number
+          points: number
+          streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievements?: Json | null
+          created_at?: string
+          id?: string
+          level?: number
+          points?: number
+          streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievements?: Json | null
+          created_at?: string
+          id?: string
+          level?: number
+          points?: number
+          streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

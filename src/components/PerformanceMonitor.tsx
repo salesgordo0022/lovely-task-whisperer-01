@@ -18,7 +18,7 @@ export function PerformanceMonitor() {
 
   useEffect(() => {
     // Mostrar apenas em desenvolvimento
-    if (process.env.NODE_ENV !== 'development') return;
+    if (!import.meta.env.DEV) return;
 
     const collectMetrics = () => {
       const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
@@ -63,7 +63,7 @@ export function PerformanceMonitor() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [isVisible]);
 
-  if (!metrics || !isVisible || process.env.NODE_ENV !== 'development') {
+  if (!metrics || !isVisible || !import.meta.env.DEV) {
     return null;
   }
 
