@@ -210,6 +210,12 @@ export function TaskCreateForm({ onSubmit }: TaskCreateFormProps) {
               setIsUrgent={setIsUrgent}
               isImportant={isImportant}
               setIsImportant={setIsImportant}
+              category={category}
+              priority={priority}
+              dueDate={dueDate}
+              startDate={startDate}
+              estimatedTime={estimatedTime}
+              checklistCount={checklistItems.length}
             />
 
             <DateTimeSection
