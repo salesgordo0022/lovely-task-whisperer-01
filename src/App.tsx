@@ -17,13 +17,14 @@ import { lazy, Suspense } from "react";
 const Index = lazy(() => import("./pages/Index"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // QueryClient com configurações otimizadas
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutos
-      gcTime: 1000 * 60 * 30, // 30 minutos
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -32,7 +33,7 @@ const queryClient = new QueryClient({
 
 function ProtectedApp() {
   const { user, loading } = useAuth();
-  useSystemOptimization(); // Initialize system optimization
+  useSystemOptimization();
   
   if (loading) {
     return (
@@ -51,19 +52,17 @@ function ProtectedApp() {
 
   return (
     <ResponsiveLayout>
-      <BrowserRouter>
-        <Suspense fallback={
-          <div className="min-h-screen flex items-center justify-center bg-background">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-          </div>
-        }>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </ResponsiveLayout>
   );
 }
@@ -74,9 +73,20 @@ const App = () => (
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <TooltipProvider>
           <AuthProvider>
-            <Toaster />
-            <Sonner />
-            <ProtectedApp />
+            <BrowserRouter>
+              <Toaster />
+              <Sonner />
+              <Suspense fallback={
+                <div className="min-h-screen flex items-center justify-center bg-background">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              }>
+                <Routes>
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/*" element={<ProtectedApp />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
             <PerformanceMonitor />
           </AuthProvider>
         </TooltipProvider>
