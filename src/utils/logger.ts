@@ -1,28 +1,27 @@
 // Production-safe logging utility
+const isDev = import.meta.env.DEV;
+
 export const logger = {
   info: (message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
       console.log(`[INFO] ${message}`, data || '');
     }
   },
   
   warn: (message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
       console.warn(`[WARN] ${message}`, data || '');
     }
   },
   
   error: (message: string, error?: any) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
       console.error(`[ERROR] ${message}`, error || '');
-    } else {
-      // In production, could send to error tracking service
-      // Example: Sentry.captureException(error);
     }
   },
   
   debug: (message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
       console.debug(`[DEBUG] ${message}`, data || '');
     }
   }

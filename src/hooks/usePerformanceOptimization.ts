@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 
 export function usePerformanceOptimization() {
-  const debounceTimers = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  const debounceTimers = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
 
   // Debounce para evitar chamadas excessivas
   const debounce = useCallback((key: string, func: () => void, delay: number = 300) => {

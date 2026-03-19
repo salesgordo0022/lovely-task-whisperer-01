@@ -6,7 +6,7 @@ const NotFound = () => {
 
   useEffect(() => {
     // Log 404 for debugging purposes
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.warn("404 - Route not found:", location.pathname);
     }
   }, [location.pathname]);
